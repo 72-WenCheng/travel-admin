@@ -254,7 +254,7 @@ const handleBackLogin = () => {
 <style lang="scss" scoped>
 .forgot-password-page {
   height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #000000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -262,62 +262,27 @@ const handleBackLogin = () => {
   position: relative;
   overflow: hidden;
   
-  // 添加装饰性背景元素
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-    background-size: 20px 20px;
-    animation: float 20s infinite linear;
-  }
+  background: #000000;
   
-  &::after {
-    content: '';
-    position: absolute;
-    top: 20%;
-    right: -10%;
-    width: 300px;
-    height: 300px;
-    background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-    border-radius: 50%;
-    animation: float 15s infinite ease-in-out;
-  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(180deg); }
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
 }
 
 .forgot-password-container {
   width: 100%;
   max-width: 450px;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(10px);
   border-radius: 24px;
   padding: 50px 40px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 
-    0 25px 50px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.2);
+    inset 0 0 20px rgba(0, 0, 0, 0.3);
   position: relative;
-  z-index: 1;
-  
-  // 添加顶部装饰线
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60px;
-    height: 4px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    border-radius: 0 0 4px 4px;
-  }
+  z-index: 2;
 }
 
 .forgot-password-header {
@@ -329,18 +294,15 @@ const handleBackLogin = () => {
     
     .el-icon {
       font-size: 48px;
-      color: #667eea;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: #ffffff;
     }
   }
   
   h1 {
     font-size: 28px;
     font-weight: 700;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #ffffff;
+    color: #ffffff;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -350,16 +312,15 @@ const handleBackLogin = () => {
   
   p {
     font-size: 16px;
-    color: #666;
+    color: #888;
     font-weight: 400;
-    opacity: 0.8;
   }
 }
 
 .forgot-password-form {
   .form-description {
     text-align: center;
-    color: #666;
+    color: #aaa;
     font-size: 14px;
     margin-bottom: 30px;
     line-height: 1.5;
@@ -369,7 +330,7 @@ const handleBackLogin = () => {
     text-align: center;
     font-size: 22px;
     font-weight: 600;
-    color: #333;
+    color: #ffffff;
     margin-bottom: 20px;
     position: relative;
     
@@ -381,7 +342,7 @@ const handleBackLogin = () => {
       transform: translateX(-50%);
       width: 40px;
       height: 3px;
-      background: linear-gradient(90deg, #667eea, #764ba2);
+      background: #ffffff;
       border-radius: 2px;
     }
   }
@@ -392,6 +353,7 @@ const handleBackLogin = () => {
     .el-form-item__error {
       font-size: 12px;
       margin-top: 6px;
+      color: #f87171;
     }
   }
   
@@ -401,95 +363,156 @@ const handleBackLogin = () => {
     width: 100%;
     
     .captcha-button {
-      border-radius: 12px;
+      border-radius: 8px;
       font-weight: 500;
       min-width: 120px;
       height: 48px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+      
+      &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.15);
+        box-shadow: none;
+      }
+      
+      &:disabled {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #666;
+        cursor: not-allowed;
+      }
     }
   }
   
   :deep(.el-input) {
     .el-input__wrapper {
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      border: 2px solid transparent;
-      transition: all 0.3s ease;
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      outline: none !important;
+      box-shadow: none !important;
       
       &:hover {
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-        border-color: rgba(102, 126, 234, 0.3);
+          border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: none !important;
       }
       
       &.is-focus {
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
-        border-color: #667eea;
+        border-color: rgba(255, 255, 255, 0.3) !important;
+        box-shadow: none !important;
+        outline: none !important;
+      }
+      
+      &:focus,
+      &:focus-within,
+      &:focus-visible {
+        outline: none !important;
+        box-shadow: none !important;
+        border-color: rgba(255, 255, 255, 0.3) !important;
       }
     }
     
     .el-input__inner {
-      font-size: 15px;
-      padding: 0 16px;
-      height: 48px;
+      color: #e0e0e0;
+      font-size: 14px;
+      padding: 0 12px;
+      outline: none !important;
+      border: none !important;
+      box-shadow: none !important;
+      
+      &:focus,
+      &:focus-visible,
+      &:focus-within {
+        outline: none !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
       
       &::placeholder {
-        color: #999;
-        font-weight: 400;
+        color: #666;
       }
     }
     
     .el-input__prefix {
-      left: 16px;
+      padding-left: 12px;
       
       .el-icon {
-        font-size: 18px;
-        color: #667eea;
+          color: #ffffff;
+        font-size: 16px;
       }
+    }
+    
+    // 覆盖所有可能的焦点状态组合
+    &.is-focus .el-input__wrapper,
+    &.is-focus .el-input__wrapper:hover {
+      border-color: rgba(255, 255, 255, 0.3) !important;
+      box-shadow: none !important;
+      outline: none !important;
+    }
+  }
+  
+  // 全局移除输入框焦点外边框
+  :deep(.el-input__wrapper.is-focus),
+  :deep(.el-input.is-focus .el-input__wrapper),
+  :deep(.el-input .el-input__wrapper.is-focus),
+  :deep(.el-form-item .el-input__wrapper.is-focus),
+  :deep(.el-form-item .el-input.is-focus .el-input__wrapper),
+  :deep(.el-input__wrapper.is-focus:hover),
+  :deep(.el-input.is-focus .el-input__wrapper:hover) {
+    box-shadow: none !important;
+    outline: none !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+  }
+  
+  :deep(input:focus),
+  :deep(input:focus-visible),
+  :deep(.el-input__inner:focus),
+  :deep(.el-input__inner:focus-visible) {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  
+  :deep(.el-input__wrapper) {
+    box-shadow: none !important;
+    
+    &::before,
+    &::after {
+      box-shadow: none !important;
+      outline: none !important;
     }
   }
   
   :deep(.el-button) {
-    border-radius: 16px;
+    border-radius: 12px;
     font-weight: 600;
     font-size: 16px;
-    height: 52px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border: none;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s;
-    }
-    
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    height: 50px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #ffffff;
       
-      &::before {
-        left: 100%;
+      &:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: none;
       }
-    }
     
     &:active {
-      transform: translateY(0);
+      transform: none;
     }
     
     &:disabled {
-      background: #ccc;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #666;
       cursor: not-allowed;
       
       &:hover {
         transform: none;
         box-shadow: none;
+        background: rgba(255, 255, 255, 0.1);
       }
     }
   }
@@ -498,7 +521,7 @@ const handleBackLogin = () => {
     text-align: center;
     margin-top: 25px;
     font-size: 14px;
-    color: #666;
+    color: #888;
     
     .link-container {
       display: flex;
@@ -508,10 +531,13 @@ const handleBackLogin = () => {
     }
     
     .back-login-text {
+      color: #ffffff !important;
       font-weight: 500;
       text-decoration: none;
       
       &:hover {
+        color: #e0e0e0 !important;
+        text-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
         text-decoration: underline;
       }
     }
@@ -557,11 +583,10 @@ const handleBackLogin = () => {
     
     :deep(.el-input) {
       .el-input__wrapper {
-        border-radius: 12px;
+        border-radius: 8px;
       }
       
       .el-input__inner {
-        height: 44px;
         font-size: 14px;
       }
     }
@@ -579,6 +604,17 @@ const handleBackLogin = () => {
         font-size: 13px;
       }
     }
+  }
+}
+
+// 全局移除所有输入框的焦点外边框
+.forgot-password-page {
+  :deep(.el-input__wrapper.is-focus) {
+    --el-input-focus-border-color: rgba(255, 255, 255, 0.3) !important;
+    --el-color-primary: rgba(255, 255, 255, 0.3) !important;
+    box-shadow: none !important;
+    outline: none !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
   }
 }
 </style>

@@ -719,92 +719,111 @@
                 核心模块使用情况 · 数据驱动决策
                 <span class="range-chip">范围：{{ functionUsageRangeLabel }}</span>
               </div>
+              <el-button 
+                type="primary" 
+                @click="refreshFunctionUsage"
+                class="refresh-btn-header"
+                size="small"
+              >
+                <el-icon><Refresh /></el-icon>
+                刷新
+              </el-button>
             </div>
           </template>
-          <el-row :gutter="20">
-            <!-- 左侧：自定义功能排名 -->
-            <el-col :span="14">
-              <div class="function-usage-panel">
-                <div class="panel-header">
-                  <div>
-                    <div class="panel-title">核心功能使用排名</div>
-                    <div class="panel-subtitle">实时更新 · {{ functionUsageRangeLabel }}</div>
+          
+          <!-- 图表展示区域 -->
+          <div class="function-charts-section">
+            <el-row :gutter="20">
+              <!-- 横向条形图 -->
+              <el-col :span="16">
+                <div class="chart-card">
+                  <div class="chart-header">
+                    <h4 class="chart-title">功能使用排名对比</h4>
+                    <p class="chart-subtitle">实时更新 · {{ functionUsageRangeLabel }}</p>
                   </div>
-                  <el-button text type="primary" @click="refreshFunctionUsage">
-                    <el-icon><Refresh /></el-icon>
-                    刷新
-                  </el-button>
+                  <v-chart 
+                    class="function-bar-chart" 
+                    :option="functionUsageBarOption" 
+                    autoresize
+                  />
                 </div>
-                <div class="panel-description">
-                  根据核心模块的实际使用次数进行排序，快速识别高频与低频功能。
+              </el-col>
+              <!-- 饼图 -->
+              <el-col :span="8">
+                <div class="chart-card">
+                  <div class="chart-header">
+                    <h4 class="chart-title">功能使用占比</h4>
+                    <p class="chart-subtitle">实时更新 · {{ functionUsageRangeLabel }}</p>
+                  </div>
+                  <v-chart 
+                    class="function-pie-chart" 
+                    :option="functionUsagePieOption" 
+                    autoresize
+                  />
                 </div>
-                <div class="usage-ranking" v-if="functionUsageRanking.length">
-                  <div
-                    v-for="item in functionUsageRanking"
-                    :key="item.name"
-                    class="ranking-item"
-                  >
-                    <div class="ranking-main">
-                      <div class="rank-index" :class="`rank-${item.rank}`">{{ item.rank }}</div>
-                      <div class="ranking-info">
-                        <div class="ranking-name">{{ item.name }}</div>
-                        <div class="ranking-desc">{{ item.description }}</div>
-                      </div>
-                      <el-tag class="value-tag" size="small">{{ item.value }}</el-tag>
+              </el-col>
+            </el-row>
+          </div>
+
+          <!-- 功能卡片网格 -->
+          <div class="function-cards-section">
+            <div class="section-header">
+              <h3 class="section-title">功能使用详情</h3>
+              <p class="section-description">
+                根据核心模块的实际使用次数进行排序，快速识别高频与低频功能
+              </p>
+            </div>
+            <div class="function-cards-grid" v-if="functionStatsData.length">
+              <div 
+                v-for="(item, index) in functionStatsData" 
+                :key="index" 
+                class="function-card"
+              >
+                <div class="card-rank" :class="`rank-${index + 1}`">
+                  <span class="rank-number">{{ index + 1 }}</span>
+                </div>
+                <div class="card-icon-wrapper">
+                  <div class="card-icon" :style="{ background: item.color }">
+                    <el-icon><component :is="item.icon" /></el-icon>
+                  </div>
+                </div>
+                <div class="card-content">
+                  <h4 class="card-name">{{ item.name }}</h4>
+                  <p class="card-desc">{{ item.description }}</p>
+                  <div class="card-stats">
+                    <div class="stat-item">
+                      <span class="stat-label">使用次数</span>
+                      <span class="stat-value">{{ item.value }}</span>
                     </div>
-                    <div class="ranking-progress">
-                      <div class="progress-track">
-                        <div
-                          class="progress-fill"
-                          :style="{ width: item.progress + '%', background: item.color }"
-                        ></div>
-                      </div>
-                      <div class="progress-meta">
-                        <span>{{ item.percent }}%</span>
-                        <span class="trend" :class="item.trend >= 0 ? 'up' : 'down'">
-                          <el-icon><Top v-if="item.trend >= 0" /><Bottom v-else /></el-icon>
-                          {{ Math.abs(item.trend) }}%
-                        </span>
-                      </div>
+                    <div class="stat-item">
+                      <span class="stat-label">占比</span>
+                      <span class="stat-percent">{{ item.percent }}%</span>
                     </div>
                   </div>
+                  <div class="card-trend">
+                    <span class="trend-badge" :class="item.trend >= 0 ? 'trend-up' : 'trend-down'">
+                      <el-icon><Top v-if="item.trend >= 0" /><Bottom v-else /></el-icon>
+                      <span>{{ Math.abs(item.trend) }}%</span>
+                    </span>
+                  </div>
                 </div>
-                <el-empty
-                  v-else
-                  description="暂无功能数据"
-                  :image-size="90"
-                  class="ranking-empty"
-                />
-              </div>
-            </el-col>
-            <!-- 右侧：详细统计 -->
-            <el-col :span="10">
-              <div class="function-stats-detail">
-                <div class="stats-title">功能使用详情</div>
-                <div class="stats-list">
-                  <div v-for="(item, index) in functionStatsData" :key="index" class="stats-item">
-                    <div class="stats-item-header">
-                      <div class="stats-icon" :style="{ background: item.color }">
-                        <el-icon><component :is="item.icon" /></el-icon>
-                </div>
-                      <div class="stats-info">
-                        <div class="stats-name">{{ item.name }}</div>
-                        <div class="stats-desc">{{ item.description }}</div>
-              </div>
-                </div>
-                    <div class="stats-data">
-                      <div class="stats-value">{{ item.value }}</div>
-                      <div class="stats-percent">{{ item.percent }}%</div>
-                      <div class="stats-trend" :class="item.trend >= 0 ? 'up' : 'down'">
-                        <el-icon><Top v-if="item.trend >= 0" /><Bottom v-else /></el-icon>
-                        {{ Math.abs(item.trend) }}%
-              </div>
-                </div>
+                <div class="card-progress">
+                  <div class="progress-bar">
+                    <div
+                      class="progress-fill"
+                      :style="{ width: item.percent + '%', background: item.color }"
+                    ></div>
                   </div>
                 </div>
               </div>
-            </el-col>
-          </el-row>
+            </div>
+            <el-empty
+              v-else
+              description="暂无功能数据"
+              :image-size="90"
+              class="function-empty"
+            />
+          </div>
         </el-card>
       </el-col>
     </el-row>
@@ -820,7 +839,7 @@ import { useRouter } from 'vue-router'
 import request from '@/utils/request'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
-import { LineChart } from 'echarts/charts'
+import { LineChart, BarChart, PieChart } from 'echarts/charts'
 import {
   TitleComponent,
   TooltipComponent,
@@ -840,6 +859,8 @@ import {
 use([
   CanvasRenderer,
   LineChart,
+  BarChart,
+  PieChart,
   TitleComponent,
   TooltipComponent,
   LegendComponent,
@@ -1477,6 +1498,193 @@ const functionUsageRanking = computed(() => {
       trend: item.trend || 0
     }
   })
+})
+
+// 功能使用横向条形图配置
+const functionUsageBarOption = computed(() => {
+  const ranking = functionUsageRanking.value
+  if (!ranking.length) {
+    return {
+      title: {
+        text: '暂无数据',
+        left: 'center',
+        top: 'middle',
+        textStyle: { color: '#909399', fontSize: 16 }
+      }
+    }
+  }
+
+  return {
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      formatter: (params: any) => {
+        const param = params[0]
+        return `${param.name}<br/>使用次数: ${param.value}次<br/>占比: ${param.data.percent}%`
+      }
+    },
+    grid: {
+      left: '15%',
+      right: '8%',
+      top: '10%',
+      bottom: '10%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'value',
+      axisLabel: {
+        color: '#606266',
+        formatter: '{value}次'
+      },
+      axisLine: { lineStyle: { color: '#e4e7ed' } },
+      splitLine: { lineStyle: { color: '#f0f2f5', type: 'dashed' } }
+    },
+    yAxis: {
+      type: 'category',
+      data: ranking.map(item => item.name),
+      axisLabel: {
+        color: '#606266',
+        fontSize: 12
+      },
+      axisLine: { lineStyle: { color: '#e4e7ed' } }
+    },
+    series: [{
+      name: '使用次数',
+      type: 'bar',
+      data: ranking.map(item => ({
+        value: item.value,
+        percent: item.percent,
+        itemStyle: {
+          color: (() => {
+            if (item.color && item.color.includes('gradient')) {
+              const colors = item.color.match(/#[0-9a-fA-F]{6}/g) || []
+              if (colors.length >= 2) {
+                return {
+                  type: 'linear',
+                  x: 0, y: 0, x2: 1, y2: 0,
+                  colorStops: [
+                    { offset: 0, color: colors[0] },
+                    { offset: 1, color: colors[1] }
+                  ]
+                }
+              }
+            }
+            // 默认渐变
+            return {
+              type: 'linear',
+              x: 0, y: 0, x2: 1, y2: 0,
+              colorStops: [
+                { offset: 0, color: '#667eea' },
+                { offset: 1, color: '#764ba2' }
+              ]
+            }
+          })(),
+          borderRadius: [0, 8, 8, 0],
+          shadowBlur: 8,
+          shadowColor: 'rgba(102, 126, 234, 0.3)',
+          shadowOffsetY: 2
+        }
+      })),
+      barWidth: '60%',
+      label: {
+        show: true,
+        position: 'right',
+        formatter: '{c}次',
+        color: '#303133',
+        fontSize: 12,
+        fontWeight: 600
+      },
+      animationDuration: 1000,
+      animationEasing: 'cubicOut'
+    }]
+  }
+})
+
+// 功能使用饼图配置
+const functionUsagePieOption = computed(() => {
+  const ranking = functionUsageRanking.value
+  if (!ranking.length) {
+    return {
+      title: {
+        text: '暂无数据',
+        left: 'center',
+        top: 'middle',
+        textStyle: { color: '#909399', fontSize: 16 }
+      }
+    }
+  }
+
+  return {
+    tooltip: {
+      trigger: 'item',
+      formatter: '{b}: {c}次 ({d}%)'
+    },
+    legend: {
+      orient: 'vertical',
+      left: 'left',
+      top: 'middle',
+      itemWidth: 12,
+      itemHeight: 12,
+      textStyle: {
+        color: '#606266',
+        fontSize: 12
+      },
+      formatter: (name: string) => {
+        const item = ranking.find(r => r.name === name)
+        return item ? `${name} (${item.value}次)` : name
+      }
+    },
+    series: [{
+      name: '功能使用',
+      type: 'pie',
+      radius: ['40%', '70%'],
+      center: ['60%', '50%'],
+      avoidLabelOverlap: false,
+      itemStyle: {
+        borderRadius: 8,
+        borderColor: '#fff',
+        borderWidth: 2
+      },
+      label: {
+        show: true,
+        formatter: '{d}%',
+        fontSize: 12,
+        fontWeight: 600,
+        color: '#303133'
+      },
+      emphasis: {
+        label: {
+          show: true,
+          fontSize: 14,
+          fontWeight: 700
+        },
+        itemStyle: {
+          shadowBlur: 20,
+          shadowOffsetX: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.3)'
+        }
+      },
+      data: ranking.map(item => {
+        let color = '#667eea'
+        if (item.color && item.color.includes('gradient')) {
+          const colors = item.color.match(/#[0-9a-fA-F]{6}/g) || []
+          color = colors[0] || '#667eea'
+        } else if (item.color && item.color.startsWith('#')) {
+          color = item.color
+        }
+        return {
+          value: item.value,
+          name: item.name,
+          itemStyle: {
+            color: color
+          }
+        }
+      }),
+      animationType: 'scale',
+      animationEasing: 'elasticOut',
+      animationDelay: (idx: number) => idx * 100
+    }]
+  }
 })
 
 // 格式化当前时间
@@ -3011,6 +3219,11 @@ const refreshFunctionUsage = async () => {
     color: #303133;
     letter-spacing: 0.5px;
     
+    .refresh-btn-header {
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    
     .header-actions {
       display: flex;
       gap: 10px;
@@ -3068,21 +3281,66 @@ const refreshFunctionUsage = async () => {
     }
   }
   
-  // 卡片美化
+  // 卡片美化 - 高级玻璃态风格
   :deep(.el-card) {
-    border-radius: 20px;
-    border: none;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.06),
+      0 2px 8px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.8) 50%, 
+        transparent 100%);
+      opacity: 0.6;
+    }
     
     &:hover {
-      box-shadow: 0 8px 32px rgba(102, 126, 234, 0.12);
+      transform: translateY(-2px);
+      box-shadow: 
+        0 16px 48px rgba(0, 0, 0, 0.08),
+        0 4px 16px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      border-color: rgba(255, 255, 255, 0.3);
     }
     
     .el-card__header {
-      padding: 24px 28px;
-      border-bottom: 2px solid rgba(102, 126, 234, 0.1);
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03));
+      padding: 28px 32px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.4) 0%, 
+        rgba(255, 255, 255, 0.2) 100%);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      position: relative;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, 
+          transparent 0%, 
+          rgba(0, 0, 0, 0.08) 50%, 
+          transparent 100%);
+      }
     }
   }
   
@@ -3098,184 +3356,522 @@ const refreshFunctionUsage = async () => {
     }
   }
 
-  // 功能统计详细列表
-  .function-stats-detail {
-    height: 100%;
-    padding: 10px 0;
+  // 图表展示区域 - 高级玻璃态设计
+  .function-charts-section {
+    margin-bottom: 40px;
     
-    .stats-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #303133;
-      margin-bottom: 20px;
-      padding-left: 12px;
-      border-left: 4px solid #667eea;
-    }
-    
-    .stats-list {
-      max-height: 350px;
-    overflow-y: auto;
-      padding-right: 8px;
-    
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-    
-    &::-webkit-scrollbar-thumb {
-        background: rgba(102, 126, 234, 0.3);
-      border-radius: 3px;
+    .chart-card {
+      background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.9) 0%, 
+        rgba(255, 255, 255, 0.7) 100%);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      padding: 24px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.06),
+        0 2px 8px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, 
+          transparent 0%, 
+          rgba(64, 158, 255, 0.3) 50%, 
+          transparent 100%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+      }
       
       &:hover {
-          background: rgba(102, 126, 234, 0.5);
+        transform: translateY(-4px);
+        border-color: rgba(64, 158, 255, 0.4);
+        box-shadow: 
+          0 16px 48px rgba(64, 158, 255, 0.12),
+          0 4px 16px rgba(0, 0, 0, 0.08),
+          inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        
+        &::before {
+          opacity: 1;
         }
       }
       
-      &::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.02);
-        border-radius: 3px;
+      .chart-header {
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+        
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -1px;
+          left: 0;
+          width: 40px;
+          height: 2px;
+          background: linear-gradient(90deg, 
+            rgba(64, 158, 255, 0.6) 0%, 
+            transparent 100%);
+          border-radius: 2px;
+        }
+        
+        .chart-title {
+          font-size: 17px;
+          font-weight: 700;
+          background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin: 0 0 6px 0;
+          line-height: 1.4;
+          letter-spacing: -0.3px;
+        }
+        
+        .chart-subtitle {
+          font-size: 12px;
+          color: #6b7280;
+          margin: 0;
+          line-height: 1.5;
+          font-weight: 500;
+          letter-spacing: 0.2px;
+        }
+      }
+      
+      .function-bar-chart {
+        width: 100%;
+        height: 420px;
+        border-radius: 12px;
+      }
+      
+      .function-pie-chart {
+        width: 100%;
+        height: 420px;
+        border-radius: 12px;
+      }
+    }
+  }
+
+  // 功能卡片区域 - 高级现代设计
+  .function-cards-section {
+    .section-header {
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      position: relative;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 60px;
+        height: 2px;
+        background: linear-gradient(90deg, 
+          rgba(64, 158, 255, 0.6) 0%, 
+          transparent 100%);
+        border-radius: 2px;
+      }
+      
+      .section-title {
+        font-size: 20px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 10px 0;
+        line-height: 1.4;
+        letter-spacing: -0.5px;
+      }
+      
+      .section-description {
+        font-size: 14px;
+        color: #6b7280;
+        margin: 0;
+        line-height: 1.6;
+        font-weight: 500;
+        letter-spacing: 0.1px;
       }
     }
     
-    .stats-item {
-      padding: 16px;
-      margin-bottom: 12px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(249, 250, 251, 0.9));
-    border-radius: 12px;
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      transition: all 0.3s ease;
-      cursor: pointer;
-    
-    &:hover {
-        border-color: rgba(102, 126, 234, 0.3);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
-        transform: translateY(-2px);
-      }
+    .function-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
       
-      &:last-child {
-        margin-bottom: 0;
-      }
-      
-      .stats-item-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 12px;
+      .function-card {
+        background: linear-gradient(135deg, 
+          rgba(255, 255, 255, 0.95) 0%, 
+          rgba(255, 255, 255, 0.85) 100%);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        padding: 24px;
+        position: relative;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        box-shadow: 
+          0 8px 32px rgba(0, 0, 0, 0.06),
+          0 2px 8px rgba(0, 0, 0, 0.04),
+          inset 0 1px 0 rgba(255, 255, 255, 0.6);
         
-        .stats-icon {
-          width: 40px;
-          height: 40px;
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: linear-gradient(90deg, 
+            transparent 0%, 
+            rgba(64, 158, 255, 0.3) 50%, 
+            transparent 100%);
+          opacity: 0;
+          transition: opacity 0.4s ease;
+        }
+        
+        &::after {
+          content: '';
+          position: absolute;
+          top: -50%;
+          right: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle, 
+            rgba(64, 158, 255, 0.05) 0%, 
+            transparent 70%);
+          opacity: 0;
+          transition: opacity 0.4s ease;
+        }
+        
+        &:hover {
+          transform: translateY(-6px) scale(1.02);
+          border-color: rgba(64, 158, 255, 0.4);
+          box-shadow: 
+            0 20px 60px rgba(64, 158, 255, 0.15),
+            0 8px 24px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+          
+          &::before,
+          &::after {
+            opacity: 1;
+          }
+          
+          .card-icon {
+            transform: scale(1.15) rotate(8deg);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+          }
+          
+          .card-rank {
+            transform: scale(1.1) rotate(5deg);
+          }
+        }
+        
+        .card-rank {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          width: 36px;
+          height: 36px;
           border-radius: 10px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: white;
-          font-size: 20px;
-          flex-shrink: 0;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          transition: all 0.3s ease;
-          
-          .el-icon {
-            font-size: 20px;
-          }
-        }
-        
-        .stats-info {
-      flex: 1;
-          min-width: 0;
-          
-          .stats-name {
-            font-size: 14px;
-        font-weight: 600;
-            color: #303133;
-            margin-bottom: 4px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
-          
-          .stats-desc {
-            font-size: 12px;
-        color: #909399;
-            white-space: nowrap;
-    overflow: hidden;
-            text-overflow: ellipsis;
-          }
-        }
-      }
-      
-      .stats-data {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        padding-left: 52px;
-        
-        .stats-value {
-          font-size: 20px;
           font-weight: 700;
-          color: #303133;
-          font-family: 'Courier New', monospace;
-        }
-        
-        .stats-percent {
-          font-size: 14px;
-          font-weight: 600;
-          color: #667eea;
-          padding: 2px 8px;
-          background: rgba(102, 126, 234, 0.1);
-          border-radius: 6px;
-        }
-        
-        .stats-trend {
-          font-size: 12px;
-          font-weight: 600;
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          padding: 2px 8px;
-          border-radius: 6px;
-          margin-left: auto;
+          font-size: 15px;
+          color: #ffffff;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          box-shadow: 
+            0 4px 12px rgba(102, 126, 234, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+          z-index: 1;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           
-          .el-icon {
-            font-size: 14px;
+          &.rank-1 {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            box-shadow: 
+              0 4px 12px rgba(255, 215, 0, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
           }
           
-          &.up {
-            color: #67c23a;
-            background: rgba(103, 194, 58, 0.1);
+          &.rank-2 {
+            background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+            box-shadow: 
+              0 4px 12px rgba(192, 192, 192, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
           }
           
-          &.down {
-            color: #f56c6c;
-            background: rgba(245, 108, 108, 0.1);
+          &.rank-3 {
+            background: linear-gradient(135deg, #cd7f32 0%, #e6a85c 100%);
+            box-shadow: 
+              0 4px 12px rgba(205, 127, 50, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+          }
+        }
+        
+        .card-icon-wrapper {
+          margin-bottom: 20px;
+          
+          .card-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+            box-shadow: 
+              0 8px 24px rgba(0, 0, 0, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            
+            &::before {
+              content: '';
+              position: absolute;
+              top: -50%;
+              left: -50%;
+              width: 200%;
+              height: 200%;
+              background: radial-gradient(circle, 
+                rgba(255, 255, 255, 0.3) 0%, 
+                transparent 70%);
+              opacity: 0;
+              transition: opacity 0.4s ease;
+            }
+            
+            &:hover::before {
+              opacity: 1;
+            }
+            
+            .el-icon {
+              font-size: 32px;
+              position: relative;
+              z-index: 1;
+            }
+          }
+        }
+        
+        .card-content {
+          .card-name {
+            font-size: 17px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 0 8px 0;
+            line-height: 1.4;
+            letter-spacing: -0.3px;
+          }
+          
+          .card-desc {
+            font-size: 13px;
+            color: #6b7280;
+            margin: 0 0 20px 0;
+            line-height: 1.6;
+            font-weight: 500;
+          }
+          
+          .card-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 16px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            
+            .stat-item {
+              display: flex;
+              flex-direction: column;
+              gap: 6px;
+              flex: 1;
+              
+              .stat-label {
+                font-size: 11px;
+                color: #9ca3af;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+              }
+              
+              .stat-value {
+                font-size: 24px;
+                font-weight: 700;
+                background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+                letter-spacing: -0.5px;
+              }
+              
+              .stat-percent {
+                font-size: 22px;
+                font-weight: 700;
+                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+                letter-spacing: -0.5px;
+              }
+            }
+          }
+          
+          .card-trend {
+            margin-bottom: 16px;
+            
+            .trend-badge {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              padding: 8px 14px;
+              border-radius: 10px;
+              font-size: 13px;
+              font-weight: 600;
+              backdrop-filter: blur(10px);
+              -webkit-backdrop-filter: blur(10px);
+              transition: all 0.3s ease;
+              
+              .el-icon {
+                font-size: 14px;
+              }
+              
+              &.trend-up {
+                color: #10b981;
+                background: linear-gradient(135deg, 
+                  rgba(16, 185, 129, 0.15) 0%, 
+                  rgba(16, 185, 129, 0.08) 100%);
+                border: 1px solid rgba(16, 185, 129, 0.2);
+              }
+              
+              &.trend-down {
+                color: #ef4444;
+                background: linear-gradient(135deg, 
+                  rgba(239, 68, 68, 0.15) 0%, 
+                  rgba(239, 68, 68, 0.08) 100%);
+                border: 1px solid rgba(239, 68, 68, 0.2);
+              }
+            }
+          }
+        }
+        
+        .card-progress {
+          margin-top: 20px;
+          
+          .progress-bar {
+            height: 10px;
+            background: rgba(0, 0, 0, 0.04);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            
+            &::before {
+              content: '';
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.3) 50%, 
+                transparent 100%);
+              animation: shimmer 2s infinite;
+            }
+            
+            .progress-fill {
+              height: 100%;
+              border-radius: 10px;
+              transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+              position: relative;
+              overflow: hidden;
+              
+              &::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(90deg, 
+                  transparent 0%, 
+                  rgba(255, 255, 255, 0.4) 50%, 
+                  transparent 100%);
+                animation: shimmer 2s infinite;
+              }
+            }
           }
         }
       }
-      
-      &:hover .stats-icon {
-      transform: scale(1.1) rotate(5deg);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-      }
+    }
+    
+    .function-empty {
+      padding: 60px 0;
     }
   }
   
-  // 卡片头部副标题
-  .header-subtitle {
-    font-size: 12px;
-    color: #909399;
-    font-weight: normal;
-    margin-left: 12px;
-
-  .range-chip {
-    display: inline-flex;
-    align-items: center;
-    padding: 0 10px;
-    margin-left: 8px;
-    border-radius: 999px;
-    font-size: 11px;
-    color: #5c6bc0;
-    background: rgba(92, 107, 192, 0.12);
-    border: 1px solid rgba(92, 107, 192, 0.2);
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
   }
+  
+  // 卡片头部副标题 - 高级样式
+  .header-subtitle {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
+    margin-left: 16px;
+    letter-spacing: 0.2px;
+
+    .range-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      margin-left: 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #3b82f6;
+      background: linear-gradient(135deg, 
+        rgba(59, 130, 246, 0.12) 0%, 
+        rgba(59, 130, 246, 0.08) 100%);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 
+        0 2px 8px rgba(59, 130, 246, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 
+          0 4px 12px rgba(59, 130, 246, 0.2),
+          inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      }
+    }
   }
 
 }

@@ -5,6 +5,7 @@
     width="600px"
     :close-on-click-modal="false"
     @close="handleClose"
+    custom-class="agreement-dialog-dark"
   >
     <div class="agreement-content">
       <div v-if="type === 'user'" class="content-section">
@@ -93,7 +94,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, nextTick, onMounted } from 'vue'
 
 const props = defineProps<{
   modelValue: boolean
@@ -116,6 +117,48 @@ const dialogTitle = computed(() => {
 const handleClose = () => {
   visible.value = false
 }
+
+// 监听对话框显示，动态添加样式类
+watch(visible, async (newVal) => {
+  if (newVal) {
+    await nextTick()
+    // 查找对话框元素并添加样式类
+    setTimeout(() => {
+      const dialogs = document.querySelectorAll('.el-dialog')
+      dialogs.forEach((dialog: any) => {
+        const title = dialog.querySelector('.el-dialog__title')
+        if (title && (title.textContent === '用户协议' || title.textContent === '隐私政策')) {
+          dialog.classList.add('agreement-dialog-dark')
+          // 直接设置样式
+          dialog.style.background = 'linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%)'
+          dialog.style.border = '1px solid rgba(255, 255, 255, 0.1)'
+          
+          const header = dialog.querySelector('.el-dialog__header')
+          if (header) {
+            header.style.background = 'transparent'
+            header.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)'
+            const headerTitle = header.querySelector('.el-dialog__title')
+            if (headerTitle) {
+              headerTitle.style.color = '#ffffff'
+            }
+          }
+          
+          const body = dialog.querySelector('.el-dialog__body')
+          if (body) {
+            body.style.background = 'transparent'
+            body.style.color = '#e0e0e0'
+          }
+          
+          const footer = dialog.querySelector('.el-dialog__footer')
+          if (footer) {
+            footer.style.background = 'transparent'
+            footer.style.borderTop = '1px solid rgba(255, 255, 255, 0.1)'
+          }
+        }
+      })
+    }, 100)
+  }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -128,7 +171,7 @@ const handleClose = () => {
     h3 {
       font-size: 20px;
       font-weight: 600;
-      color: #333;
+      color: #ffffff;
       margin-bottom: 20px;
       text-align: center;
     }
@@ -136,7 +179,7 @@ const handleClose = () => {
     h4 {
       font-size: 16px;
       font-weight: 600;
-      color: #555;
+      color: #ffffff;
       margin-top: 24px;
       margin-bottom: 12px;
       
@@ -148,7 +191,7 @@ const handleClose = () => {
     p {
       font-size: 14px;
       line-height: 1.8;
-      color: #666;
+      color: #aaa;
       margin-bottom: 12px;
       text-align: justify;
     }
@@ -160,28 +203,128 @@ const handleClose = () => {
   
   .el-button {
     min-width: 120px;
-  }
-}
-
-// 自定义滚动条样式
-:deep(.el-dialog__body) {
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
     
     &:hover {
-      background: #a8a8a8;
+      background: rgba(255, 255, 255, 0.15);
     }
   }
 }
+</style>
+
+<!-- 对话框全局样式（对话框渲染在body下，需要使用全局样式） -->
+<style lang="scss">
+// 使用多种选择器确保覆盖所有情况
+.el-overlay .agreement-dialog-dark,
+.el-dialog__wrapper .agreement-dialog-dark,
+body .el-overlay .agreement-dialog-dark,
+body .el-dialog__wrapper .agreement-dialog-dark,
+.agreement-dialog-dark {
+  background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  
+  .el-dialog__header {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 20px !important;
+    margin: 0 !important;
+    
+    .el-dialog__title {
+      color: #ffffff !important;
+      font-weight: 600 !important;
+    }
+    
+    .el-dialog__headerbtn {
+      .el-dialog__close {
+        color: #888 !important;
+        
+        &:hover {
+          color: #ffffff !important;
+        }
+      }
+    }
+  }
+
+  .el-dialog__body {
+    background: transparent !important;
+    color: #e0e0e0 !important;
+    padding: 20px !important;
+    
+    // 自定义滚动条样式
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 3px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
+
+  .el-dialog__footer {
+    background: transparent !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 20px !important;
+    margin: 0 !important;
+    
+    .el-button {
+      background: rgba(255, 255, 255, 0.1) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      color: #ffffff !important;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.15) !important;
+      }
+    }
+  }
+}
+
+// 如果 custom-class 不生效，通过内容匹配（使用 :has 选择器，现代浏览器支持）
+body .el-overlay .el-dialog:has(.agreement-content),
+body .el-dialog__wrapper .el-dialog:has(.agreement-content),
+body .el-overlay .el-dialog:has([class*="agreement"]),
+body .el-dialog__wrapper .el-dialog:has([class*="agreement"]) {
+  background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  
+  .el-dialog__header {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    
+    .el-dialog__title {
+      color: #ffffff !important;
+    }
+    
+    .el-dialog__headerbtn .el-dialog__close {
+      color: #888 !important;
+      
+      &:hover {
+        color: #ffffff !important;
+      }
+    }
+  }
+  
+  .el-dialog__body {
+    background: transparent !important;
+    color: #e0e0e0 !important;
+  }
+  
+  .el-dialog__footer {
+    background: transparent !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
 </style>
 
