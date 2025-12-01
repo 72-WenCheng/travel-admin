@@ -261,11 +261,6 @@
             @click="navigateTo(feature.path)"
           >
             <div class="feature-background" :style="{ background: feature.gradient }"></div>
-            <div class="feature-icon">
-              <el-icon :size="40">
-                <component :is="feature.icon" />
-              </el-icon>
-            </div>
             <h3 class="feature-title">{{ feature.title }}</h3>
             <p class="feature-desc">{{ feature.desc }}</p>
             <div class="feature-arrow">
@@ -4517,39 +4512,6 @@ onMounted(() => {
         opacity: 0.05;
         transition: all 0.3s ease;
         pointer-events: none;
-      }
-      
-      .feature-icon {
-        width: 72px;
-        height: 72px;
-        border-radius: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 20px;
-        position: relative;
-        z-index: 2;
-        pointer-events: none;
-      }
-      
-      &.feature-1 .feature-icon {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-      }
-      
-      &.feature-2 .feature-icon {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
-      }
-      
-      &.feature-3 .feature-icon {
-        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-        color: white;
-      }
-      
-      &.feature-4 .feature-icon {
-        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-        color: white;
       }
       
       .feature-title {

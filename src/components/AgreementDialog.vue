@@ -2,7 +2,8 @@
   <el-dialog
     v-model="visible"
     :title="dialogTitle"
-    width="600px"
+    width="760px"
+    align-center
     :close-on-click-modal="false"
     @close="handleClose"
     custom-class="agreement-dialog-dark"
@@ -39,7 +40,7 @@
         <p>我们有权随时修改本协议，修改后的协议将在系统中公布。继续使用本系统即视为您接受修改后的协议。</p>
         
         <h4>8. 联系方式</h4>
-        <p>如有疑问，请联系我们：support@zhly.com</p>
+<p>如有疑问，请联系我们：{{ contactEmail }}</p>
       </div>
       
       <div v-if="type === 'privacy'" class="content-section">
@@ -81,20 +82,22 @@
         <p>我们可能不定期更新本隐私政策，重大变更会通知您。</p>
         
         <h4>9. 联系我们</h4>
-        <p>如对本隐私政策有疑问，请联系：privacy@zhly.com</p>
+<p>如对本隐私政策有疑问，请联系：{{ contactEmail }}</p>
       </div>
     </div>
     
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="handleClose">我已阅读</el-button>
+        <el-button @click="handleConfirm">我已阅读</el-button>
       </div>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick, onMounted } from 'vue'
+import { computed, watch, nextTick, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useSystemStore } from '@/stores/system'
 
 const props = defineProps<{
   modelValue: boolean
@@ -103,7 +106,11 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
+  confirmed: []
 }>()
+
+const systemStore = useSystemStore()
+const { contactEmail } = storeToRefs(systemStore)
 
 const visible = computed({
   get: () => props.modelValue,
@@ -116,6 +123,11 @@ const dialogTitle = computed(() => {
 
 const handleClose = () => {
   visible.value = false
+}
+
+const handleConfirm = () => {
+  emit('confirmed')
+  handleClose()
 }
 
 // 监听对话框显示，动态添加样式类
@@ -159,13 +171,24 @@ watch(visible, async (newVal) => {
     }, 100)
   }
 })
+
+onMounted(() => {
+  systemStore.fetchConfig()
+})
 </script>
 
 <style lang="scss" scoped>
 .agreement-content {
-  max-height: 500px;
+  max-height: 70vh;
   overflow-y: auto;
-  padding: 20px 0;
+  padding: 24px 0;
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // IE/Edge
+  
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
   
   .content-section {
     h3 {
@@ -251,24 +274,12 @@ body .el-dialog__wrapper .agreement-dialog-dark,
     background: transparent !important;
     color: #e0e0e0 !important;
     padding: 20px !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
     
-    // 自定义滚动条样式
     &::-webkit-scrollbar {
-      width: 6px;
-    }
-    
-    &::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 3px;
-    }
-    
-    &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 3px;
-      
-      &:hover {
-        background: rgba(255, 255, 255, 0.3);
-      }
+      width: 0 !important;
+      height: 0 !important;
     }
   }
 
@@ -318,6 +329,13 @@ body .el-dialog__wrapper .el-dialog:has([class*="agreement"]) {
   .el-dialog__body {
     background: transparent !important;
     color: #e0e0e0 !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    
+    &::-webkit-scrollbar {
+      width: 0 !important;
+      height: 0 !important;
+    }
   }
   
   .el-dialog__footer {

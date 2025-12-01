@@ -28,11 +28,8 @@
       <el-col :span="6">
         <div class="stat-card-enhanced stat-users" @click="handleCardClick('users')">
           <div class="card-header-mini">
-            <div class="card-icon">
-              <el-icon><User /></el-icon>
-            </div>
             <span class="card-title">用户统计</span>
-            </div>
+          </div>
           <div class="card-main">
             <div class="main-value">{{ stats.totalUsers }}</div>
             <div class="main-label">总用户数</div>
@@ -72,11 +69,8 @@
       <el-col :span="6">
         <div class="stat-card-enhanced stat-plans" @click="handleCardClick('plans')">
           <div class="card-header-mini">
-            <div class="card-icon">
-              <el-icon><Document /></el-icon>
-            </div>
             <span class="card-title">攻略统计</span>
-            </div>
+          </div>
           <div class="card-main">
             <div class="main-value">{{ stats.totalPlans }}</div>
             <div class="main-label">总攻略数</div>
@@ -116,11 +110,8 @@
       <el-col :span="6">
         <div class="stat-card-enhanced stat-attractions" @click="handleCardClick('attractions')">
           <div class="card-header-mini">
-            <div class="card-icon">
-              <el-icon><Location /></el-icon>
-            </div>
             <span class="card-title">景点统计</span>
-            </div>
+          </div>
           <div class="card-main">
             <div class="main-value">{{ stats.totalAttractions }}</div>
             <div class="main-label">总景点数</div>
@@ -160,11 +151,8 @@
       <el-col :span="6">
         <div class="stat-card-enhanced stat-orders" @click="handleCardClick('orders')">
           <div class="card-header-mini">
-            <div class="card-icon">
-              <el-icon><ShoppingCart /></el-icon>
-            </div>
             <span class="card-title">订单统计</span>
-            </div>
+          </div>
           <div class="card-main">
             <div class="main-value">{{ stats.totalOrders }}</div>
             <div class="main-label">总订单数</div>
@@ -207,9 +195,6 @@
       <el-col :span="6">
         <div class="stat-card-enhanced stat-comments" @click="handleCardClick('comments')">
           <div class="card-header-mini">
-            <div class="card-icon">
-              <el-icon><ChatDotRound /></el-icon>
-            </div>
             <span class="card-title">评论统计</span>
           </div>
           <div class="card-main">
@@ -271,9 +256,6 @@
       <el-col :span="6">
         <div class="stat-card-enhanced stat-favorites" @click="handleCardClick('favorites')">
           <div class="card-header-mini">
-            <div class="card-icon">
-              <el-icon><Star /></el-icon>
-            </div>
             <span class="card-title">收藏统计</span>
           </div>
           <div class="card-main">
@@ -316,9 +298,6 @@
       <el-col :span="6">
         <div class="stat-card-enhanced stat-browse" @click="handleCardClick('views')">
           <div class="card-header-mini">
-            <div class="card-icon">
-              <el-icon><View /></el-icon>
-            </div>
             <span class="card-title">收藏 & 浏览</span>
           </div>
           <div class="card-main">
@@ -385,9 +364,6 @@
       <el-col :span="6">
         <div class="stat-card-enhanced stat-ai" @click="handleCardClick('ai')">
           <div class="card-header-mini">
-            <div class="card-icon">
-              <el-icon><MagicStick /></el-icon>
-            </div>
             <span class="card-title">AI使用统计</span>
           </div>
           <div class="card-main">
@@ -707,6 +683,113 @@
       </el-col>
     </el-row>
 
+    <!-- 全球访问地图 -->
+    <div class="world-map-wrapper">
+      <el-card class="world-map-card">
+        <template #header>
+          <div class="world-map-header">
+            <div class="header-left">
+              <div>
+                <div class="header-title">全球访问地图</div>
+                <div class="header-subtitle">查看各区域访问与检索热度，支持快速查询</div>
+              </div>
+            </div>
+          </div>
+        </template>
+        <div class="world-map-section">
+          <div class="world-map-canvas">
+            <template v-if="worldMapReady && worldMapData.length">
+              <v-chart
+                class="world-map-chart"
+                :option="worldMapOption"
+                autoresize
+                @click="handleWorldCountryClick"
+              />
+            </template>
+            <div class="world-map-placeholder" v-else>
+              <el-empty
+                :image-size="120"
+                :description="worldMapLoadError ? '地图资源加载失败' : '地图加载中...'"
+              />
+              <el-button
+                v-if="worldMapLoadError"
+                type="primary"
+                size="small"
+                @click="reloadWorldMapAsset"
+              >
+                重试加载
+              </el-button>
+            </div>
+          </div>
+          <div class="world-map-sidebar">
+            <div class="world-map-search">
+              <el-input
+                v-model="worldSearch"
+                placeholder="输入国家或地区名称快速查询"
+                clearable
+              >
+                <template #prefix>
+                  <el-icon><Search /></el-icon>
+                </template>
+              </el-input>
+            </div>
+            <div class="world-map-summary">
+              <div class="summary-item">
+                <span class="label">覆盖地区</span>
+                <span class="value">{{ worldMapData.length }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="label">总访问量</span>
+                <span class="value">{{ totalWorldVisits }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="label">总检索量</span>
+                <span class="value">{{ totalWorldQueries }}</span>
+              </div>
+            </div>
+            <el-scrollbar class="world-map-list">
+              <div
+                v-for="item in filteredWorldStats"
+                :key="item.code"
+                class="world-map-list-item"
+                :class="{ active: worldSelectedCountry && worldSelectedCountry.code === item.code }"
+                @click="selectWorldCountry(item)"
+              >
+                <div class="item-header">
+                  <span class="country-name">{{ item.cnName }} · {{ item.name }}</span>
+                  <span class="country-value">{{ getWorldMetricValue(item) }}</span>
+                </div>
+                <div class="item-footer">
+                  <span>访问 {{ item.visits }}</span>
+                  <span>检索 {{ item.queries }}</span>
+                </div>
+              </div>
+              <div v-if="!filteredWorldStats.length" class="world-map-empty">
+                暂无匹配结果
+              </div>
+            </el-scrollbar>
+            <div class="world-map-detail" v-if="worldSelectedCountry">
+              <div class="detail-title">
+                {{ worldSelectedCountry.cnName }} ({{ worldSelectedCountry.name }})
+              </div>
+              <div class="detail-row">
+                <span>访问量</span>
+                <strong>{{ worldSelectedCountry.visits }}</strong>
+              </div>
+              <div class="detail-row">
+                <span>检索量</span>
+                <strong>{{ worldSelectedCountry.queries }}</strong>
+              </div>
+              <div class="detail-row">
+                <span>平均停留</span>
+                <strong>{{ worldSelectedCountry.avgDuration }}s</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </el-card>
+    </div>
+
     <!-- 系统功能使用分析 -->
     <el-row :gutter="20" style="margin-top: 20px;">
       <el-col :span="24">
@@ -717,17 +800,8 @@
               <span>系统功能使用分析</span>
               <div class="header-subtitle">
                 核心模块使用情况 · 数据驱动决策
-                <span class="range-chip">范围：{{ functionUsageRangeLabel }}</span>
+                <span class="range-chip simple">{{ functionUsageRangeLabel }}</span>
               </div>
-              <el-button 
-                type="primary" 
-                @click="refreshFunctionUsage"
-                class="refresh-btn-header"
-                size="small"
-              >
-                <el-icon><Refresh /></el-icon>
-                刷新
-              </el-button>
             </div>
           </template>
           
@@ -779,14 +853,6 @@
                 :key="index" 
                 class="function-card"
               >
-                <div class="card-rank" :class="`rank-${index + 1}`">
-                  <span class="rank-number">{{ index + 1 }}</span>
-                </div>
-                <div class="card-icon-wrapper">
-                  <div class="card-icon" :style="{ background: item.color }">
-                    <el-icon><component :is="item.icon" /></el-icon>
-                  </div>
-                </div>
                 <div class="card-content">
                   <h4 class="card-name">{{ item.name }}</h4>
                   <p class="card-desc">{{ item.description }}</p>
@@ -837,14 +903,16 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 // @ts-ignore: Vite 别名在编译时解析
 import request from '@/utils/request'
-import { use } from 'echarts/core'
+import { use, registerMap } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
-import { LineChart, BarChart, PieChart } from 'echarts/charts'
+import { LineChart, BarChart, PieChart, MapChart } from 'echarts/charts'
 import {
   TitleComponent,
   TooltipComponent,
   LegendComponent,
-  GridComponent
+  GridComponent,
+  VisualMapComponent,
+  GeoComponent
 } from 'echarts/components'
 import VChart from 'vue-echarts'
 import { 
@@ -861,11 +929,53 @@ use([
   LineChart,
   BarChart,
   PieChart,
+  MapChart,
   TitleComponent,
   TooltipComponent,
   LegendComponent,
-  GridComponent
+  GridComponent,
+  VisualMapComponent,
+  GeoComponent
 ])
+
+// 使用本地静态文件提供世界地图 GeoJSON（放在 travel-admin/public/world.json）
+const WORLD_MAP_REMOTE_URL = '/world.json'
+
+let worldMapRegisterPromise: Promise<void> | null = null
+const worldMapReady = ref(false)
+const worldMapLoadError = ref(false)
+
+const ensureWorldMapRegistered = () => {
+  if (!worldMapRegisterPromise) {
+    worldMapRegisterPromise = fetch(WORLD_MAP_REMOTE_URL)
+      .then(res => {
+        if (!res.ok) {
+          throw new Error('世界地图数据获取失败')
+        }
+        return res.json()
+      })
+      .then((geoJson: any) => {
+        registerMap('world', geoJson)
+        worldMapReady.value = true
+        worldMapLoadError.value = false
+      })
+      .catch(error => {
+        console.error('加载世界地图失败:', error)
+        worldMapRegisterPromise = null
+        worldMapReady.value = false
+        worldMapLoadError.value = true
+      })
+  }
+  return worldMapRegisterPromise
+}
+
+const reloadWorldMapAsset = async () => {
+  worldMapReady.value = false
+  worldMapLoadError.value = false
+  worldMapRegisterPromise = null
+  await ensureWorldMapRegistered()
+  updateWorldMapOption()
+}
 
 // 自动刷新配置
 const refreshInterval = ref(30000) // 30秒刷新一次
@@ -1059,6 +1169,206 @@ const iconComponents: Record<string, any> = {
   Odometer,
   ChatDotRound
 }
+
+type WorldCountryStat = {
+  code: string
+  name: string
+  cnName: string
+  visits: number
+  queries: number
+  avgDuration: number
+}
+
+const defaultWorldMapData: WorldCountryStat[] = [
+  { code: 'CN', name: 'China', cnName: '中国', visits: 15230, queries: 3240, avgDuration: 186 },
+  { code: 'US', name: 'United States', cnName: '美国', visits: 12340, queries: 2980, avgDuration: 162 },
+  { code: 'JP', name: 'Japan', cnName: '日本', visits: 8450, queries: 2100, avgDuration: 148 },
+  { code: 'KR', name: 'South Korea', cnName: '韩国', visits: 6120, queries: 1502, avgDuration: 132 },
+  { code: 'FR', name: 'France', cnName: '法国', visits: 4880, queries: 1105, avgDuration: 141 },
+  { code: 'DE', name: 'Germany', cnName: '德国', visits: 5020, queries: 1188, avgDuration: 139 },
+  { code: 'GB', name: 'United Kingdom', cnName: '英国', visits: 4650, queries: 990, avgDuration: 136 },
+  { code: 'AU', name: 'Australia', cnName: '澳大利亚', visits: 3520, queries: 802, avgDuration: 129 },
+  { code: 'TH', name: 'Thailand', cnName: '泰国', visits: 2980, queries: 650, avgDuration: 118 },
+  { code: 'BR', name: 'Brazil', cnName: '巴西', visits: 2760, queries: 610, avgDuration: 120 },
+  { code: 'AE', name: 'United Arab Emirates', cnName: '阿联酋', visits: 2050, queries: 480, avgDuration: 126 },
+  { code: 'ZA', name: 'South Africa', cnName: '南非', visits: 1880, queries: 420, avgDuration: 117 }
+]
+
+const worldMapData = ref<WorldCountryStat[]>([...defaultWorldMapData])
+const worldSelectedCountry = ref<WorldCountryStat | null>(worldMapData.value[0] || null)
+const worldSearch = ref('')
+const worldMapOption = ref<any>({
+  tooltip: {
+    trigger: 'item',
+    formatter: (params: any) => {
+      const target = worldMapData.value.find(item => item.name === params.name)
+      if (!target) {
+        return `${params.name}: ${params.value || 0}`
+      }
+      return `${target.cnName} (${target.name})<br/>访问量：${target.visits}<br/>检索量：${target.queries}`
+    }
+  },
+  visualMap: {
+    min: 0,
+    max: 15000,
+    text: ['高', '低'],
+    realtime: true,
+    calculable: true,
+    inRange: {
+      color: ['#dfe9f3', '#a1c4fd', '#3f72af']
+    }
+  },
+  series: [
+    {
+      type: 'map',
+      map: 'world',
+      roam: true,
+      zoom: 1.15,
+      itemStyle: {
+        borderColor: '#ffffff',
+        borderWidth: 0.6,
+        areaColor: '#e8eef9'
+      },
+      emphasis: {
+        label: {
+          show: false
+        },
+        itemStyle: {
+          areaColor: '#fbbf24'
+        }
+      },
+      data: []
+    }
+  ]
+})
+
+const getWorldMetricValue = (item: WorldCountryStat): number => {
+  if (!item) return 0
+  // 地图与排序统一使用访问量作为主指标
+  return item.visits || 0
+}
+
+const filteredWorldStats = computed(() => {
+  const keyword = worldSearch.value.trim().toLowerCase()
+  const list = worldMapData.value
+    .filter(item => {
+      if (!keyword) return true
+      return (
+        item.name.toLowerCase().includes(keyword) ||
+        item.cnName.includes(keyword) ||
+        item.code.toLowerCase().includes(keyword)
+      )
+    })
+    .sort((a, b) => getWorldMetricValue(b) - getWorldMetricValue(a))
+  return list
+})
+
+const totalWorldVisits = computed(() => {
+  const total = worldMapData.value.reduce((sum, item) => sum + (item.visits || 0), 0)
+  return total.toLocaleString()
+})
+
+const totalWorldQueries = computed(() => {
+  const total = worldMapData.value.reduce((sum, item) => sum + (item.queries || 0), 0)
+  return total.toLocaleString()
+})
+
+const updateWorldMapOption = () => {
+  const values = worldMapData.value.map(item => getWorldMetricValue(item))
+  const maxValue = values.length ? Math.max(...values) : 100
+  worldMapOption.value = {
+    ...worldMapOption.value,
+    visualMap: {
+      ...(worldMapOption.value.visualMap || {}),
+      max: Math.max(maxValue, 100)
+    },
+    series: [
+      {
+        ...(worldMapOption.value.series?.[0] || {}),
+        type: 'map',
+        map: 'world',
+        data: worldMapData.value.map(item => ({
+          name: item.name,
+          value: getWorldMetricValue(item)
+        }))
+      }
+    ]
+  }
+}
+
+const selectWorldCountry = (country: WorldCountryStat) => {
+  worldSelectedCountry.value = country
+}
+
+const handleWorldCountryClick = (params: any) => {
+  if (!params || !params.name) return
+  const target = worldMapData.value.find(
+    item => item.name === params.name || item.cnName === params.name
+  )
+  if (target) {
+    worldSelectedCountry.value = target
+  }
+}
+
+const loadGlobalTraffic = async (options: { silent?: boolean } = {}) => {
+  const { silent = true } = options
+  let success = false
+  try {
+    await ensureWorldMapRegistered()
+    const result = await request.get('/statistics/world-traffic')
+    if (result.code === 200 && Array.isArray(result.data)) {
+      worldMapData.value = result.data.map((item: any) => ({
+        code: item.code || item.countryCode || item.isoCode || item.name,
+        name: item.name || item.country || item.countryEn || item.code,
+        cnName: item.cnName || item.countryCn || item.nameCn || item.name,
+        visits: item.visits || item.traffic || item.value || 0,
+        queries: item.queries || item.search || item.query || 0,
+        avgDuration: item.avgDuration || item.duration || 0
+      }))
+      success = true
+    } else if (!silent) {
+      ElMessage.warning('未获取到全球访问数据，使用示例数据')
+    }
+  } catch (error) {
+    if (!silent) {
+      ElMessage.warning('全球访问数据加载失败，已使用示例数据')
+    }
+  } finally {
+    if (!worldMapData.value.length) {
+      worldMapData.value = [...defaultWorldMapData]
+    }
+    if (!worldSelectedCountry.value && worldMapData.value.length) {
+      worldSelectedCountry.value = worldMapData.value[0]
+    }
+    updateWorldMapOption()
+    return success
+  }
+}
+
+watch(
+  () => worldMapData.value,
+  () => {
+    updateWorldMapOption()
+  },
+  { deep: true }
+)
+
+watch(filteredWorldStats, list => {
+  if (!list.length) {
+    worldSelectedCountry.value = null
+    return
+  }
+  if (!worldSelectedCountry.value) {
+    worldSelectedCountry.value = list[0]
+    return
+  }
+  const exists = list.some(item => item.code === worldSelectedCountry.value?.code)
+  if (!exists) {
+    worldSelectedCountry.value = list[0]
+  }
+})
+
+updateWorldMapOption()
 
 const functionUsageRangeTextMap: Record<string, string> = {
   today: '今日实时',
@@ -1880,6 +2190,7 @@ const loadDashboardData = async () => {
     }
     
     await loadFunctionUsage(true)
+    await loadGlobalTraffic({ silent: true })
     
     // 5. 加载用户增长趋势（根据时间范围）
     const days = getDaysByTimeRange(timeRange.value)
@@ -2175,16 +2486,6 @@ const loadFunctionUsage = async (suppressError = true) => {
   }
 }
 
-// 刷新功能使用统计
-const refreshFunctionUsage = async () => {
-  try {
-    ElMessage.info('正在刷新功能使用统计...')
-    await loadFunctionUsage(false)
-    ElMessage.success('功能使用统计已更新')
-  } catch (error: any) {
-    ElMessage.error('刷新失败: ' + (error?.message || '未知错误'))
-  }
-}
 </script>
 
 <style lang="scss" scoped>
@@ -2377,6 +2678,16 @@ const refreshFunctionUsage = async () => {
       }
     }
   }
+
+  // 全局覆盖本页面内 el-select 的聚焦样式，去掉默认蓝色边框
+  :deep(.el-select .el-input__wrapper.is-focus),
+  :deep(.el-select .el-input__wrapper:focus),
+  :deep(.el-select .el-input__wrapper:focus-visible),
+  :deep(.el-select .el-input.is-focus .el-input__wrapper) {
+    box-shadow: 0 0 0 1px #dcdfe6 inset !important;
+    border-color: #dcdfe6 !important;
+    outline: none !important;
+  }
   
   @keyframes rotate {
     from {
@@ -2405,11 +2716,7 @@ const refreshFunctionUsage = async () => {
 
     &::before {
       content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
+      display: none;
     }
 
     &:hover {
@@ -2425,21 +2732,9 @@ const refreshFunctionUsage = async () => {
     .card-header-mini {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 0;
       padding: 16px 20px 12px;
       border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-
-      .card-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        color: white;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      }
 
       .card-title {
         font-size: 14px;
@@ -3460,6 +3755,193 @@ const refreshFunctionUsage = async () => {
     }
   }
 
+  // 全球访问地图样式
+  .world-map-wrapper {
+    margin-top: 20px;
+  }
+
+  .world-map-card {
+    .world-map-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+
+        .header-left {
+          .header-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+          }
+
+          .header-subtitle {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 4px;
+          }
+        }
+
+    }
+
+    .world-map-section {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .world-map-canvas {
+      flex: 2;
+      min-width: 420px;
+      min-height: 420px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(79, 172, 254, 0.08), rgba(0, 242, 254, 0.08));
+      padding: 16px;
+    }
+
+    .world-map-chart {
+      width: 100%;
+      height: 100%;
+    }
+      
+      .world-map-placeholder {
+        width: 100%;
+        height: 100%;
+        min-height: 360px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      .world-map-sidebar {
+      flex: 1;
+      min-width: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .world-map-search {
+      :deep(.el-input__wrapper) {
+        border-radius: 12px;
+        // 移除聚焦时的蓝色高亮
+        box-shadow: none !important;
+        border-color: #dcdfe6 !important;
+      }
+      
+      :deep(.el-input__wrapper.is-focus),
+      :deep(.el-input__wrapper:focus),
+      :deep(.el-input__wrapper:focus-visible) {
+        box-shadow: 0 0 0 1px #dcdfe6 inset !important;
+        border-color: #dcdfe6 !important;
+        outline: none !important;
+      }
+    }
+
+    .world-map-summary {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+
+      .summary-item {
+        background: #f9fafb;
+        border-radius: 12px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        .label {
+          font-size: 12px;
+          color: #9ca3af;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .value {
+          font-size: 20px;
+          font-weight: 700;
+          color: #111827;
+        }
+      }
+    }
+
+    .world-map-list {
+      max-height: 280px;
+
+      .world-map-list-item {
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        margin-bottom: 10px;
+        background: #fff;
+        cursor: pointer;
+          transition: border-color 0.2s ease, background-color 0.2s ease;
+
+        .item-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-weight: 600;
+          color: #1f2937;
+          margin-bottom: 4px;
+        }
+
+        .item-footer {
+          display: flex;
+          gap: 12px;
+          font-size: 12px;
+          color: #6b7280;
+        }
+
+        &.active {
+          border-color: rgba(79, 172, 254, 0.5);
+          background: linear-gradient(135deg, rgba(79, 172, 254, 0.08), rgba(0, 242, 254, 0.08));
+        }
+
+          // 悬停时不再上浮和增加阴影，保持简洁
+          &:hover {
+            transform: none;
+            box-shadow: none;
+          }
+      }
+
+      .world-map-empty {
+        text-align: center;
+        color: #9ca3af;
+        padding: 12px 0;
+      }
+    }
+
+    .world-map-detail {
+      border-radius: 14px;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(79, 70, 229, 0.08));
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      .detail-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1f2937;
+      }
+
+      .detail-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        color: #4b5563;
+
+        strong {
+          color: #111827;
+          font-size: 15px;
+        }
+      }
+    }
+  }
+
   // 功能卡片区域 - 高级现代设计
   .function-cards-section {
     .section-header {
@@ -3502,11 +3984,24 @@ const refreshFunctionUsage = async () => {
         letter-spacing: 0.1px;
       }
     }
-    
     .function-cards-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 24px;
+      // 桌面端两行铺满
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      
+      // 响应式调整
+      @media (max-width: 1400px) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      
+      @media (max-width: 1024px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      
+      @media (max-width: 640px) {
+        grid-template-columns: 1fr;
+      }
       
       .function-card {
         background: linear-gradient(135deg, 
@@ -3574,93 +4069,6 @@ const refreshFunctionUsage = async () => {
           
           .card-rank {
             transform: scale(1.1) rotate(5deg);
-          }
-        }
-        
-        .card-rank {
-          position: absolute;
-          top: 20px;
-          right: 20px;
-          width: 36px;
-          height: 36px;
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 700;
-          font-size: 15px;
-          color: #ffffff;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          box-shadow: 
-            0 4px 12px rgba(102, 126, 234, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.3);
-          z-index: 1;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          
-          &.rank-1 {
-            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-            box-shadow: 
-              0 4px 12px rgba(255, 215, 0, 0.4),
-              inset 0 1px 0 rgba(255, 255, 255, 0.3);
-          }
-          
-          &.rank-2 {
-            background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
-            box-shadow: 
-              0 4px 12px rgba(192, 192, 192, 0.4),
-              inset 0 1px 0 rgba(255, 255, 255, 0.3);
-          }
-          
-          &.rank-3 {
-            background: linear-gradient(135deg, #cd7f32 0%, #e6a85c 100%);
-            box-shadow: 
-              0 4px 12px rgba(205, 127, 50, 0.4),
-              inset 0 1px 0 rgba(255, 255, 255, 0.3);
-          }
-        }
-        
-        .card-icon-wrapper {
-          margin-bottom: 20px;
-          
-          .card-icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 32px;
-            box-shadow: 
-              0 8px 24px rgba(0, 0, 0, 0.2),
-              inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            
-            &::before {
-              content: '';
-              position: absolute;
-              top: -50%;
-              left: -50%;
-              width: 200%;
-              height: 200%;
-              background: radial-gradient(circle, 
-                rgba(255, 255, 255, 0.3) 0%, 
-                transparent 70%);
-              opacity: 0;
-              transition: opacity 0.4s ease;
-            }
-            
-            &:hover::before {
-              opacity: 1;
-            }
-            
-            .el-icon {
-              font-size: 32px;
-              position: relative;
-              z-index: 1;
-            }
           }
         }
         
@@ -3870,6 +4278,20 @@ const refreshFunctionUsage = async () => {
         box-shadow: 
           0 4px 12px rgba(59, 130, 246, 0.2),
           inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      }
+
+      &.simple {
+        padding: 4px 10px;
+        color: #666;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.04);
+        border: none;
+        box-shadow: none;
+
+        &:hover {
+          transform: none;
+          box-shadow: none;
+        }
       }
     }
   }

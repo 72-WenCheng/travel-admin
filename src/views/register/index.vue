@@ -56,12 +56,15 @@
             />
           </el-form-item>
           <el-form-item class="agreement-item">
-            <el-checkbox v-model="agreeTerms">
-              我已阅读并同意
-              <el-link type="primary" @click="showUserAgreement">《用户协议》</el-link>
-              和
-              <el-link type="primary" @click="showPrivacyPolicy">《隐私政策》</el-link>
-            </el-checkbox>
+            <div class="agreement-wrapper">
+              <el-checkbox v-model="agreeTerms" class="agreement-checkbox" />
+              <div class="agreement-text" @click.stop>
+                <span>我已阅读并同意</span>
+                <el-link type="primary" @click.stop.prevent="showUserAgreement">《用户协议》</el-link>
+                <span>和</span>
+                <el-link type="primary" @click.stop.prevent="showPrivacyPolicy">《隐私政策》</el-link>
+              </div>
+            </div>
           </el-form-item>
           <el-form-item>
             <el-button 
@@ -86,13 +89,21 @@
     </div>
     
     <!-- 用户协议和隐私政策对话框 -->
-    <AgreementDialog v-model="showUserAgreementDialog" type="user" />
-    <AgreementDialog v-model="showPrivacyDialog" type="privacy" />
+    <AgreementDialog 
+      v-model="showUserAgreementDialog" 
+      type="user" 
+      @confirmed="handleAgreementConfirmed('user')" 
+    />
+    <AgreementDialog 
+      v-model="showPrivacyDialog" 
+      type="privacy" 
+      @confirmed="handleAgreementConfirmed('privacy')" 
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { authAPI } from '@/api/auth'
@@ -117,6 +128,8 @@ const registerForm = reactive({
 
 // 同意条款
 const agreeTerms = ref(false)
+const userAgreementRead = ref(false)
+const privacyAgreementRead = ref(false)
 
 // 表单验证规则
 const passwordMinLength = ref(6)
@@ -345,6 +358,24 @@ const showUserAgreement = () => {
 const showPrivacyPolicy = () => {
   showPrivacyDialog.value = true
 }
+
+const handleAgreementConfirmed = (type: 'user' | 'privacy') => {
+  if (type === 'user') {
+    userAgreementRead.value = true
+  } else {
+    privacyAgreementRead.value = true
+  }
+  if (!agreeTerms.value && userAgreementRead.value && privacyAgreementRead.value) {
+    agreeTerms.value = true
+  }
+}
+
+watch(agreeTerms, (val) => {
+  if (!val) {
+    userAgreementRead.value = false
+    privacyAgreementRead.value = false
+  }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -444,47 +475,52 @@ const showPrivacyPolicy = () => {
   
   .agreement-item {
     margin-bottom: 20px !important;
-    
-    :deep(.el-checkbox) {
+    .agreement-wrapper {
       display: flex;
       align-items: center;
-      
-      .el-checkbox__input {
-        display: flex;
-        align-items: center;
-        vertical-align: middle;
-        
-        .el-checkbox__inner {
-          vertical-align: middle;
-        }
-      }
-      
-      .el-checkbox__label {
-        color: #888;
-        font-size: 14px;
-        line-height: 1.5;
-        display: flex;
-        align-items: center;
-        vertical-align: middle;
-        
-        .el-link {
-          color: #ffffff !important;
-          font-size: 14px;
-          text-decoration: none;
-          line-height: 1.5;
-          font-weight: 500;
-          
-          &:hover {
-            color: #e0e0e0 !important;
-            text-decoration: underline;
-          }
-        }
-      }
+      gap: 6px;
+    }
+    
+    :deep(.agreement-checkbox .el-checkbox__input) {
+      margin-top: 0;
+    }
+    
+    :deep(.el-checkbox) {
+      margin-right: 0;
       
       .el-checkbox__input.is-checked .el-checkbox__inner {
         background: rgba(255, 255, 255, 0.2);
         border-color: #ffffff;
         box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      }
+    }
+    
+    .agreement-text {
+      color: #888;
+      font-size: 14px;
+      line-height: 1.4;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0;
+      
+      span {
+        display: flex;
+        align-items: center;
+        margin-right: 2px;
+      }
+      
+      .el-link {
+        color: #ffffff !important;
+        font-size: 14px;
+        margin: 0 1px;
+        text-decoration: none;
+        font-weight: 500;
+        
+        &:hover {
+          color: #e0e0e0 !important;
+          text-decoration: underline;
+        }
       }
     }
   }
