@@ -106,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useSystemStore } from '@/stores/system'
@@ -207,6 +207,18 @@ const getWeatherInfo = async () => {
 onMounted(() => {
   getWeatherInfo()
 })
+
+watch(
+  () => route.fullPath,
+  async () => {
+    await nextTick()
+    const main = document.querySelector('.main-content') as HTMLElement | null
+    if (main) {
+      main.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  }
+)
 </script>
 
 <style lang="scss">

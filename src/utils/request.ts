@@ -1,6 +1,9 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/user'
+
+// 是否已经弹出了登录过期提示，避免重复弹窗
+let isSessionExpired = false
 
 // 创建axios实例
 const request: AxiosInstance = axios.create({
@@ -37,11 +40,38 @@ request.interceptors.request.use(
 
 // 响应拦截器
 request.interceptors.response.use(
-  (response: AxiosResponse) => {
+  async (response: AxiosResponse) => {
     const { data } = response
     
     // 如果返回的是Result格式
     if (data && typeof data === 'object' && 'code' in data) {
+      // 业务级别的未登录 / 会话超时
+      if (data.code === 401 || data.code === 403) {
+        if (!isSessionExpired) {
+          isSessionExpired = true
+          try {
+            await ElMessageBox.confirm(
+              data.message || '登录状态已失效，请重新登录',
+              '提示',
+              {
+                type: 'warning',
+                confirmButtonText: '重新登录',
+                cancelButtonText: '取消',
+                closeOnClickModal: false,
+                closeOnPressEscape: false,
+              }
+            )
+          } catch {
+            // 用户点了取消或关闭，对行为不做强制
+          }
+          const userStore = useUserStore()
+          userStore.logout()
+          window.location.href = '/'
+          isSessionExpired = false
+        }
+        return Promise.reject(new Error(data.message || '登录状态已失效'))
+      }
+
       if (data.code === 200) {
         // 返回data字段的内容，保持原有的Result结构
         return data
@@ -60,13 +90,29 @@ request.interceptors.response.use(
       const { status, data } = error.response
       
       switch (status) {
-        case 401:
-          ElMessage.error('未授权，请重新登录')
-          // 清除token并跳转到登录页
-          const userStore = useUserStore()
-          userStore.logout()
-          window.location.href = '/'
+        case 401: {
+          // HTTP 级别未授权，也按会话超时处理
+          if (!isSessionExpired) {
+            isSessionExpired = true
+            ElMessageBox.confirm(
+              (data && (data.message || data.msg)) || '登录状态已失效，请重新登录',
+              '提示',
+              {
+                type: 'warning',
+                confirmButtonText: '重新登录',
+                cancelButtonText: '取消',
+                closeOnClickModal: false,
+                closeOnPressEscape: false,
+              }
+            ).finally(() => {
+              const userStore = useUserStore()
+              userStore.logout()
+              window.location.href = '/'
+              isSessionExpired = false
+            })
+          }
           break
+        }
         case 403:
           ElMessage.error('禁止访问')
           break

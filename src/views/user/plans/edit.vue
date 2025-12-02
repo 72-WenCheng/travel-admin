@@ -286,21 +286,34 @@
             class="cover-uploader"
             :action="uploadUrl"
             :headers="uploadHeaders"
-            :show-file-list="false"
+            list-type="picture-card"
+            :file-list="coverFileList"
             :on-success="handleCoverSuccess"
             :before-upload="beforeCoverUpload"
             :on-error="handleCoverError"
+            :on-preview="handlePicturePreview"
+            :on-remove="handleCoverRemove"
+            multiple
           >
-            <img v-if="planForm.coverImage" :src="planForm.coverImage" class="cover-image" />
-            <div v-else class="cover-uploader-icon">
-              <el-icon><Plus /></el-icon>
-              <div class="upload-text">点击上传封面图片</div>
-            </div>
+            <el-icon><Plus /></el-icon>
           </el-upload>
-          <div class="upload-tip">建议尺寸：800x600，支持 JPG、PNG 格式，大小不超过 2MB</div>
+          <div class="upload-tip">建议尺寸：800x600，支持 JPG、PNG 格式，大小不超过 2MB；可上传多张图片</div>
         </el-form-item>
       </el-form>
     </el-card>
+
+    <!-- 图片大图预览（与创建攻略复用同一风格） -->
+    <el-dialog
+      v-model="previewVisible"
+      width="720px"
+      :show-close="true"
+      :close-on-click-modal="true"
+      class="image-preview-dialog"
+    >
+      <div class="image-preview-wrapper" v-if="previewImageUrl">
+        <img :src="previewImageUrl" alt="预览图片" class="image-preview-img" />
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -431,6 +444,9 @@ const tagInputRef = ref()
 
 // 上传相关
 const uploadUrl = ref('/api/upload/image')
+const coverFileList = ref<any[]>([])
+const previewVisible = ref(false)
+const previewImageUrl = ref('')
 
 // 上传请求头（需要token）
 const uploadHeaders = computed(() => {
@@ -506,6 +522,11 @@ const loadPlanDetail = async () => {
         tags: tagsArray,
         coverImage: coverImageValue
       })
+
+      // 初始化封面缩略图列表
+      coverFileList.value = coverImageValue
+        ? [{ name: '封面', url: coverImageValue }]
+        : []
       
       ElMessage.success('加载成功')
     } else {
@@ -612,43 +633,43 @@ const beforeCoverUpload = (file: File) => {
   return true
 }
 
-// 上传成功
-const handleCoverSuccess = (response: any) => {
-  console.log('上传响应:', response)
-  // 处理不同的响应格式
-  if (response && response.code === 200) {
-    let imageUrl = ''
-    if (response.data) {
-      // 如果data是字符串，直接使用
-      if (typeof response.data === 'string') {
-        imageUrl = response.data
-      } else if (response.data.fileUrl) {
-        // 优先使用fileUrl字段（后端返回的格式）
-        imageUrl = response.data.fileUrl
-      } else if (response.data.url) {
-        // 兼容url字段
-        imageUrl = response.data.url
-      } else if (response.data.filePath) {
-        // 兼容filePath字段，需要转换为访问URL
-        imageUrl = response.data.filePath.startsWith('/') ? response.data.filePath : '/' + response.data.filePath
-      } else {
-        imageUrl = response.data
-      }
-    } else if (response.url) {
-      imageUrl = response.url
-    } else if (response.fileUrl) {
-      imageUrl = response.fileUrl
+// 从上传响应中提取图片地址（与创建攻略保持一致）
+const extractImageUrl = (response: any) => {
+  if (!response) return ''
+  if (response.code === 200 && response.data) {
+    const data = response.data
+    if (typeof data === 'string') return data
+    if (data.fileUrl) return data.fileUrl
+    if (data.url) return data.url
+    if (data.filePath) {
+      return data.filePath.startsWith('/') ? data.filePath : '/' + data.filePath
     }
-    
-    if (imageUrl) {
-      planForm.coverImage = imageUrl
-      ElMessage.success('封面上传成功')
-    } else {
-      ElMessage.error('上传成功但无法获取图片地址')
-    }
-  } else {
-    ElMessage.error(response?.message || '上传失败，请检查服务器响应格式')
+    return String(data)
   }
+  if (response.url) return response.url
+  if (response.fileUrl) return response.fileUrl
+  return ''
+}
+
+// 上传成功（维护缩略图列表和封面字段）
+const handleCoverSuccess = (response: any, file: any, fileList: any[]) => {
+  console.log('上传响应:', response)
+  const imageUrl = extractImageUrl(response)
+
+  if (!imageUrl) {
+    ElMessage.error('上传成功但无法获取图片地址')
+    return
+  }
+
+  // 更新缩略图列表
+  coverFileList.value = fileList.map((item) => {
+    const url = item.url || extractImageUrl(item.response) || imageUrl
+    return { ...item, url }
+  })
+
+  // 更新封面地址
+  planForm.coverImage = imageUrl
+  ElMessage.success('封面上传成功')
 }
 
 // 上传失败
@@ -661,6 +682,23 @@ const handleCoverError = (error: any) => {
     errorMessage = error.response.data.message
   }
   ElMessage.error(errorMessage)
+}
+
+// 预览图片（缩略图点击）
+const handlePicturePreview = (file: any) => {
+  const url = file.url || extractImageUrl(file.response)
+  if (!url) return
+  previewImageUrl.value = url
+  previewVisible.value = true
+}
+
+// 删除图片：清理缩略图和封面
+const handleCoverRemove = (file: any, fileList: any[]) => {
+  const url = file.url || extractImageUrl(file.response)
+  if (url && planForm.coverImage === url) {
+    planForm.coverImage = ''
+  }
+  coverFileList.value = fileList
 }
 
 // 保存草稿
@@ -787,6 +825,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+// 让编辑页的整体视觉和“创建攻略”保持完全一致
 .edit-plan {
   min-height: 100vh;
   background: #f5f7fa;
@@ -798,23 +837,21 @@ onMounted(() => {
     align-items: center;
     margin-bottom: 20px;
     padding: 20px 24px;
-    background: white;
+    background: #ffffff;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    
-    .header-left {
-      h2 {
-        margin: 0;
-        font-size: 20px;
-        font-weight: 600;
-        color: #303133;
-      }
+
+    h2 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: #303133;
     }
-    
+
     .header-actions {
       display: flex;
       gap: 12px;
-      
+
       .square-btn {
         border-radius: 4px;
         padding: 8px 20px;
@@ -823,7 +860,7 @@ onMounted(() => {
         background-color: #ffffff;
         border: 1px solid #dcdfe6;
         color: #606266;
-        
+
         &:hover {
           transform: none !important;
           box-shadow: none !important;
@@ -834,12 +871,12 @@ onMounted(() => {
       }
     }
   }
-  
+
   .icon-btn {
     transition: none;
     color: #909399;
     border: 1px dashed #dcdfe6;
-    
+
     &:hover {
       transform: none !important;
       box-shadow: none !important;
@@ -847,7 +884,7 @@ onMounted(() => {
       border-color: #409eff;
       background: #ecf5ff;
     }
-    
+
     &.delete-btn {
       &:hover {
         color: #f56c6c;
@@ -856,227 +893,175 @@ onMounted(() => {
       }
     }
   }
-  
+
   .form-card {
     position: relative;
     z-index: 10;
-    border-radius: 24px;
-    border: none;
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(10px);
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    animation: cardFadeIn 0.6s ease-out 0.2s both;
-    
+    border-radius: 12px;
+    border: 1px solid #e4e7ed;
+    background: #ffffff;
+    box-shadow: none;
+
     :deep(.el-card__body) {
       padding: 32px;
     }
-    
+
     :deep(.el-form) {
       .el-form-item__label {
         font-weight: 600;
         color: #606266;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        height: 44px;
+        padding-bottom: 0;
       }
-      
+
       .el-input__wrapper,
       .el-textarea__inner {
-        border-radius: 12px;
-        transition: all 0.3s;
-        
+        border-radius: 4px;
+        transition: none;
+        min-height: 44px;
+        border: 1px solid #dcdfe6 !important;
+        box-shadow: none !important;
+        background-color: #ffffff !important;
+
         &:hover {
-          box-shadow: 0 0 0 1px rgba(102, 126, 234, 0.2);
+          border: 1px solid #dcdfe6 !important;
+          box-shadow: none !important;
+          background-color: #ffffff !important;
         }
-        
+
         &.is-focus {
-          box-shadow: 0 0 0 1px #667eea !important;
+          border: 1px solid #dcdfe6 !important;
+          box-shadow: none !important;
+          background-color: #ffffff !important;
         }
       }
-      
+
+      :deep(.el-input__inner),
+      :deep(.el-textarea__inner) {
+        font-size: 16px !important;
+        padding-top: 12px;
+        padding-bottom: 12px;
+      }
+
       .el-input-number {
         .el-input__wrapper {
-          border-radius: 12px;
+          border-radius: 4px;
         }
       }
-      
+
       .el-select {
         .el-input__wrapper {
-          border-radius: 12px;
+          border-radius: 4px;
         }
       }
-      
+
       .el-divider {
         margin: 32px 0 24px;
-        
+
         .el-divider__text {
-          font-size: 16px;
-          font-weight: 700;
-          background: linear-gradient(135deg, #667eea, #764ba2);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          display: flex;
+          display: inline-flex;
           align-items: center;
-          gap: 8px;
+          gap: 6px;
+          font-size: 16px;
+          font-weight: 600;
+          color: #303133;
         }
       }
-      
+
       .el-tag {
         border-radius: 16px;
         padding: 6px 14px;
         font-weight: 600;
       }
-      
+
       .el-button {
         border-radius: 12px;
         font-weight: 600;
         transition: all 0.3s;
-        
-        &--primary {
-          background: linear-gradient(135deg, #667eea, #764ba2);
-          border: none;
-          
-          &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-          }
-        }
-        
-        &--success {
-          background: linear-gradient(135deg, #67c23a, #85ce61);
-          border: none;
-          
-          &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(103, 194, 58, 0.4);
-          }
-        }
-        
-        &--danger {
-          background: linear-gradient(135deg, #f56c6c, #ff8a8a);
-          border: none;
-          
-          &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(245, 108, 108, 0.4);
-          }
-        }
       }
     }
-    
+
     .tags-container {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
     }
-    
+
+    // 行程安排：与“创建攻略”页面统一的白色扁平样式，去掉紫色渐变
     .schedule-section {
       .day-schedule {
-        border: 2px solid rgba(102, 126, 234, 0.1);
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.02), rgba(118, 75, 162, 0.02));
-        border-radius: 16px;
-        padding: 24px;
-        margin-bottom: 20px;
-        transition: all 0.3s;
-        
-        &:hover {
-          border-color: rgba(102, 126, 234, 0.3);
-          box-shadow: 0 4px 20px rgba(102, 126, 234, 0.1);
-        }
-        
+        border: 1px solid #e4e7ed;
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 16px;
+
         .day-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 20px;
-          
+          margin-bottom: 16px;
+
           h4 {
             margin: 0;
-            font-size: 17px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #303133;
           }
         }
-        
+
         .day-content {
           .schedule-item {
-            margin-bottom: 16px;
-            padding: 16px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            margin-bottom: 12px;
+            padding: 12px;
+            background: #fafafa;
+            border-radius: 8px;
+            box-shadow: none;
           }
         }
       }
     }
-    
+
+    // 费用明细：和创建页一致
     .cost-section {
       .cost-item {
-        margin-bottom: 16px;
-        padding: 16px;
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.02), rgba(118, 75, 162, 0.02));
-        border-radius: 12px;
-        border: 2px solid rgba(102, 126, 234, 0.1);
-        
-        &:hover {
-          border-color: rgba(102, 126, 234, 0.3);
-        }
+        margin-bottom: 12px;
+        padding: 12px;
+        background: #fafafa;
+        border-radius: 8px;
+        border: 1px solid #e4e7ed;
       }
     }
-    
+
+    // 封面上传：完全复用创建页的白色上传卡片风格
     .cover-uploader {
-      :deep(.el-upload) {
-        border-radius: 16px;
-        overflow: hidden;
-        transition: all 0.3s;
-        
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-        }
+      :deep(.el-upload--picture-card) {
+        border-radius: 12px;
+        background-color: #fafafa;
+        border: 1px dashed #dcdfe6;
+        transition: none;
       }
-      
-      .cover-image {
-        width: 300px;
-        height: 180px;
-        object-fit: cover;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+
+      :deep(.el-upload--picture-card:hover) {
+        border-color: #c0c4cc;
+        background-color: #f5f7fa;
+        transform: none;
+        box-shadow: none;
       }
-      
-      .cover-uploader-icon {
-        width: 300px;
-        height: 180px;
-        border: 3px dashed rgba(102, 126, 234, 0.3);
-        border-radius: 16px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        font-size: 48px;
-        color: #667eea;
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
-        transition: all 0.3s;
-        
-        &:hover {
-          border-color: #667eea;
-          background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-        }
-        
-        .upload-text {
-          font-size: 14px;
-          font-weight: 600;
-        }
+
+      :deep(.el-upload-list__item.is-success) {
+        border-radius: 12px;
+      }
+
+      // 隐藏 Element Plus 默认的“按 Delete 键可删除”文字提示，只保留删除按钮
+      :deep(.el-upload-list__item-status-label) {
+        display: none;
       }
     }
-    
+
     .upload-tip {
       margin-top: 8px;
       font-size: 12px;
@@ -1089,6 +1074,28 @@ onMounted(() => {
       color: #909399;
       font-style: italic;
     }
+
+    // 其余表单内提示样式 END
+  }
+
+  // 图片预览弹窗样式（与创建页保持一致）
+  .image-preview-dialog {
+    :deep(.el-dialog__body) {
+      padding: 0;
+    }
+  }
+
+  .image-preview-wrapper {
+    text-align: center;
+    background: #000;
+  }
+
+  .image-preview-img {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
   }
 }
 

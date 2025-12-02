@@ -14,7 +14,14 @@
         </div>
       </div>
       <div class="header-actions">
-        <el-button class="simple-btn" @click="handleSaveAll" :loading="saving">保存设置</el-button>
+        <el-button
+          type="success"
+          class="action-btn"
+          @click="handleSaveAll"
+          :loading="saving"
+        >
+          保存设置
+        </el-button>
       </div>
     </div>
 
@@ -170,17 +177,38 @@
                 </el-table-column>
               </el-table>
               
-              <el-pagination
-                class="logs-pagination"
-                v-model:current-page="logPagination.page"
-                v-model:page-size="logPagination.size"
-                :page-sizes="[10, 20, 50, 100]"
-                :total="logPagination.total"
-                layout="total, sizes, prev, pager, next, jumper"
-                @size-change="handleLogSizeChange"
-                @current-change="handleLogPageChange"
-                style="margin-top: 20px;"
-              />
+              <div class="logs-pagination" style="margin-top: 20px;">
+                <div class="logs-pagination-pages">
+                  <el-button
+                    class="page-btn"
+                    :disabled="logPagination.page <= 1"
+                    @click="handleLogPageChange(logPagination.page - 1)"
+                  >
+                    <el-icon><ArrowLeft /></el-icon>
+                  </el-button>
+                  <span class="page-info">
+                    {{ logPagination.page }} / {{ Math.max(1, Math.ceil((logPagination.total || 1) / (logPagination.size || 10))) }}
+                  </span>
+                  <el-button
+                    class="page-btn"
+                    :disabled="logPagination.page >= Math.ceil((logPagination.total || 1) / (logPagination.size || 10))"
+                    @click="handleLogPageChange(logPagination.page + 1)"
+                  >
+                    <el-icon><ArrowRight /></el-icon>
+                  </el-button>
+                </div>
+                <div class="logs-pagination-jump">
+                  <span>前往</span>
+                  <el-input
+                    v-model.number="logPageJump"
+                    size="small"
+                    class="page-jump-input"
+                    @keyup.enter="handleLogPageJump"
+                    @blur="handleLogPageJump"
+                  />
+                  <span>页</span>
+                </div>
+              </div>
             </el-card>
           </div>
         </el-tab-pane>
@@ -192,7 +220,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Setting, Check, Refresh } from '@element-plus/icons-vue'
+import { Setting, Check, Refresh, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
 import request from '@/utils/request'
 import { getCacheConfig, updateCacheConfig, getSecurityConfig, updateSecurityConfig } from '@/api/systemConfig'
 import BackButton from '@/components/BackButton.vue'
@@ -243,9 +271,10 @@ const securitySettings = reactive({
 const logList = ref([])
 const logPagination = reactive({
   page: 1,
-  size: 20,
+  size: 10,
   total: 0
 })
+const logPageJump = ref<number | null>(null)
 const LOGS_AUTO_REFRESH_INTERVAL = 30000
 const logsAutoRefreshTimer = ref<number | null>(null)
 
@@ -515,6 +544,16 @@ const handleLogPageChange = (page: number) => {
   loadLogs()
 }
 
+const handleLogPageJump = () => {
+  const totalPages = Math.max(1, Math.ceil((logPagination.total || 1) / (logPagination.size || 10)))
+  let target = Number(logPageJump.value || 1)
+  if (!Number.isFinite(target)) return
+  if (target < 1) target = 1
+  if (target > totalPages) target = totalPages
+  if (target === logPagination.page) return
+  handleLogPageChange(target)
+}
+
 // 格式化时间
 const formatDateTime = (time: string) => {
   if (!time) return '-'
@@ -597,19 +636,49 @@ onUnmounted(() => {
 
     .header-actions {
       display: flex;
+      align-items: center;
       gap: 12px;
+      flex-shrink: 0;
 
-      :deep(.el-button) {
-        padding: 8px 20px !important;
-        border-radius: 6px !important;
-        font-size: 14px !important;
-        border: 1px solid #d7dae0 !important;
-        background: #fff !important;
-        color: #5f6673 !important;
+      .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: 1px solid #dcdfe6;
+        background: #fff;
+        color: #606266;
+        font-weight: 400;
+        font-size: 14px;
+        box-shadow: none;
+        transition: all 0.2s ease;
+
+        .el-icon {
+          font-size: 16px;
+          color: #606266;
+        }
 
         &:hover {
-          background: #f6f7f9 !important;
-          border-color: #caced6 !important;
+          border-color: #c0c4cc;
+          color: #606266;
+          background: #fff;
+        }
+
+        &[type="success"] {
+          border-color: #dcdfe6;
+          color: #606266;
+          background: #fff;
+
+          .el-icon {
+            color: #606266;
+          }
+
+          &:hover {
+            background: #fff;
+            border-color: #c0c4cc;
+            color: #606266;
+          }
         }
       }
     }
@@ -800,6 +869,36 @@ onUnmounted(() => {
 
     .logs-pagination {
       margin-bottom: 0 !important;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    
+    .logs-pagination-pages {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .logs-pagination-jump {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #909399;
+
+      // 去掉“前往第几页”输入框的灰色背景，统一为白色扁平样式
+      :deep(.el-input__inner) {
+        background-color: #fff;
+        box-shadow: none;
+      }
+
+      // 缩小“前往第几页”输入框的宽度
+      .page-jump-input {
+        width: 60px;
+      }
     }
   }
 }
@@ -839,12 +938,10 @@ onUnmounted(() => {
     }
 
     &:hover {
-      background: #f6f7f9 !important;
       border-color: #caced6 !important;
     }
 
     &:active {
-      background: #f2f3f5 !important;
       border-color: #caced6 !important;
     }
   }
@@ -877,6 +974,10 @@ onUnmounted(() => {
   }
 }
 </style>
+
+
+
+
 
 
 

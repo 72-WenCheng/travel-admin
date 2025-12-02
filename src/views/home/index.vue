@@ -196,7 +196,7 @@
   <el-dialog
     v-model="changePasswordDialogVisible"
     title="修改密码"
-    width="600px"
+    width="520px"
     :close-on-click-modal="false"
     class="change-password-dialog"
   >
@@ -204,8 +204,8 @@
       ref="passwordFormRef"
       :model="passwordForm"
       :rules="passwordRules"
-      label-width="100px"
       label-position="top"
+      class="password-form-minimal"
     >
       <el-form-item label="原密码" prop="oldPassword">
         <el-input
@@ -227,7 +227,7 @@
           size="large"
         />
       </el-form-item>
-      <el-form-item label="确认密码" prop="confirmPassword">
+      <el-form-item label="确认新密码" prop="confirmPassword">
         <el-input
           v-model="passwordForm.confirmPassword"
           type="password"
@@ -239,9 +239,13 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <div class="password-dialog-footer">
-        <el-button class="password-dialog-btn" @click="changePasswordDialogVisible = false">取消</el-button>
-        <el-button class="password-dialog-btn" @click="handleChangePassword" :loading="changePasswordLoading">
+      <div class="password-dialog-footer-minimal">
+        <el-button @click="changePasswordDialogVisible = false">取消</el-button>
+        <el-button
+          type="primary"
+          @click="handleChangePassword"
+          :loading="changePasswordLoading"
+        >
           确定
         </el-button>
       </div>
@@ -257,8 +261,11 @@
     class="deactivate-dialog"
   >
     <div class="deactivate-warning">
-      <p>提交注销后会立即退出登录，并进入 7 天冷静期，期间账号数据会暂存，登录一次即可取消注销。</p>
-      <p>若 7 天内没有再次登录，系统会在到期时彻底删除账号及其数据。</p>
+      <p class="deactivate-warning-title">注销前请先了解：</p>
+      <ul class="deactivate-warning-list">
+        <li>提交注销后会立即退出登录，并进入 7 天冷静期，期间账号数据会暂存，登录一次即可取消注销。</li>
+        <li>若 7 天内没有再次登录，系统会在到期时彻底删除账号及其数据。</li>
+      </ul>
     </div>
     <el-form
       ref="deactivateFormRef"
@@ -293,7 +300,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useSystemStore } from '@/stores/system'
@@ -805,6 +812,20 @@ onMounted(() => {
     router.push('/')
   }
 })
+
+// 路由变化时，将当前布局内的滚动容器滚动到顶部
+watch(
+  () => route.fullPath,
+  async () => {
+    await nextTick()
+    const main = document.querySelector('.home-layout .main-content') as HTMLElement | null
+    if (main) {
+      main.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    }
+    // 兜底：同时把窗口本身也滚动到顶部
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  }
+)
 </script>
 
 <style lang="scss" scoped>
@@ -1128,18 +1149,15 @@ onMounted(() => {
         50% { left: 100%; }
       }
       
-      &:hover {
-        background: linear-gradient(135deg, #ffffff 0%, #e3e9ff 100%);
-        transform: translateY(-3px) scale(1.02);
-        box-shadow: 
-          0 14px 30px rgba(79, 110, 251, 0.18),
-          inset 0 1px 0 rgba(255, 255, 255, 1),
-          0 0 25px rgba(79, 110, 251, 0.25);
-        border-color: rgba(79, 110, 251, 0.25);
-      }
-      
+      &:hover,
       &:active {
-        transform: translateY(-1px) scale(1);
+        background: linear-gradient(135deg, #ffffff 0%, #eef2ff 100%);
+        transform: none;
+        box-shadow: 
+          0 8px 24px rgba(79, 110, 251, 0.12),
+          inset 0 1px 0 rgba(255, 255, 255, 0.9),
+          inset 0 -1px 0 rgba(79, 110, 251, 0.08);
+        border-color: rgba(79, 110, 251, 0.15);
       }
       
       .title-icon {
@@ -1655,6 +1673,35 @@ onMounted(() => {
     background: #fff !important;
   }
   
+  .password-info-strip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(59, 130, 246, 0.08));
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    margin-bottom: 20px;
+    
+    .password-info-icon {
+      font-size: 24px;
+      color: #4f46e5;
+    }
+    
+    .password-info-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 13px;
+      color: #475569;
+      
+      strong {
+        font-size: 14px;
+        color: #1f2937;
+      }
+    }
+  }
+  
   .el-dialog__footer {
     padding: 20px 24px 24px !important;
     background: linear-gradient(to top, #fafbfc 0%, #f5f7fa 100%) !important;
@@ -1682,19 +1729,20 @@ onMounted(() => {
       .el-form-item__content {
         .el-input {
           .el-input__wrapper {
-            border-radius: 6px !important;
-            box-shadow: 0 0 0 1px #dcdfe6 inset !important;
+            border-radius: 10px !important;
+            box-shadow: 0 0 0 1px #e2e8f0 inset !important;
             transition: all 0.2s ease;
-            background: #fff !important;
+            background: #f8fafc !important;
             padding: 12px 16px !important;
             min-height: 44px !important;
             
             &:hover {
-              box-shadow: 0 0 0 1px #c0c4cc inset !important;
+              box-shadow: 0 0 0 1px #cbd5f5 inset !important;
             }
             
             &.is-focus {
-              box-shadow: 0 0 0 1px #409eff inset !important;
+              box-shadow: 0 0 0 1px #6366f1 inset !important;
+              background: #fff !important;
             }
           }
           
@@ -1755,8 +1803,83 @@ onMounted(() => {
   }
 }
 
-// 注销对话框
-:deep(.deactivate-dialog) {
+</style>
+
+<style lang="scss">
+// 修改密码对话框全局样式（非 scoped，因为 dialog 渲染在 body 下）
+.el-overlay .change-password-dialog {
+  .el-dialog {
+    border-radius: 10px !important;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06) !important;
+  }
+  
+  .el-dialog__header {
+    padding: 16px 20px !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    margin: 0 !important;
+    
+    .el-dialog__title {
+      font-size: 16px !important;
+      font-weight: 500 !important;
+      color: #262626 !important;
+    }
+  }
+  
+  .el-dialog__body {
+    padding: 18px 20px 10px !important;
+    background: #ffffff !important;
+  }
+  
+  .el-dialog__footer {
+    padding: 10px 20px 16px !important;
+    background: #ffffff !important;
+    border-top: 1px solid #f0f0f0 !important;
+    margin: 0 !important;
+    
+    .password-dialog-footer-minimal {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      
+      .el-button {
+        min-width: 80px;
+        border-radius: 6px;
+        font-weight: 500;
+      }
+      
+      // 取消按钮：白底浅灰边
+      .el-button:first-child {
+        border-color: #d9d9d9;
+        background-color: #ffffff;
+        color: #595959;
+        
+        &:hover {
+          border-color: #bfbfbf;
+          color: #404040;
+          background-color: #ffffff;
+        }
+      }
+      
+      // 确定按钮：同样采用白色系，只用边框和文字颜色做区分
+      .el-button--primary {
+        background-color: #ffffff;
+        border-color: #ff9f7a;
+        color: #ff6a3c;
+        
+        &:hover {
+          background-color: #fff7f3;
+          border-color: #ff8553;
+          color: #ff6a3c;
+        }
+      }
+    }
+  }
+}
+
+// 注销对话框全局样式
+.el-overlay .deactivate-dialog {
   .deactivate-warning {
     background: #fff5f5;
     border: 1px solid #fecaca;
@@ -1766,111 +1889,31 @@ onMounted(() => {
     font-size: 13px;
     line-height: 1.6;
     margin-bottom: 16px;
+
+    .deactivate-warning-title {
+      font-weight: 600;
+      margin: 0 0 6px 0;
+    }
+
+    .deactivate-warning-list {
+      margin: 0;
+      padding-left: 18px;
+
+      li {
+        margin: 2px 0;
+      }
+    }
   }
 
   .el-dialog__body {
-    padding-top: 10px;
+    // 让内容整体离边框更远一些，阅读更舒服
+    padding: 20px 24px 16px !important;
   }
 
   .deactivate-dialog-footer {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
-  }
-}
-</style>
-
-<style lang="scss">
-// 修改密码对话框全局样式（非 scoped，因为 dialog 渲染在 body 下）
-.el-overlay .change-password-dialog {
-  .el-dialog {
-    border-radius: 12px !important;
-    overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
-  }
-  
-  .el-dialog__header {
-    padding: 24px 24px 20px !important;
-    background: linear-gradient(to bottom, #fafbfc 0%, #f5f7fa 100%) !important;
-    border-bottom: 1px solid #ebeef5 !important;
-    margin: 0 !important;
-    
-    .el-dialog__title {
-      font-size: 18px !important;
-      font-weight: 600 !important;
-      color: #303133 !important;
-      letter-spacing: 0.3px;
-    }
-    
-    .el-dialog__headerbtn {
-      top: 20px !important;
-      right: 20px !important;
-      
-      .el-dialog__close {
-        color: #909399 !important;
-        font-size: 18px !important;
-        transition: color 0.2s ease;
-        
-        &:hover {
-          color: #606266 !important;
-        }
-      }
-    }
-  }
-  
-  .el-dialog__body {
-    padding: 28px 24px !important;
-    background: #fff !important;
-  }
-  
-  .el-dialog__footer {
-    padding: 20px 24px 24px !important;
-    background: linear-gradient(to top, #fafbfc 0%, #f5f7fa 100%) !important;
-    border-top: 1px solid #ebeef5 !important;
-    margin: 0 !important;
-  }
-  
-  // 表单样式优化
-  .el-form {
-    .el-form-item {
-      margin-bottom: 22px !important;
-      
-      &:last-child {
-        margin-bottom: 0 !important;
-      }
-      
-      .el-form-item__label {
-        font-size: 14px !important;
-        color: #606266 !important;
-        font-weight: 500 !important;
-        padding-bottom: 8px !important;
-        line-height: 1.5;
-      }
-      
-      .el-form-item__content {
-        .el-input {
-          .el-input__wrapper {
-            border-radius: 6px !important;
-            box-shadow: 0 0 0 1px #dcdfe6 inset !important;
-            transition: all 0.2s ease;
-            background: #fff !important;
-            
-            &:hover {
-              box-shadow: 0 0 0 1px #c0c4cc inset !important;
-            }
-            
-            &.is-focus {
-              box-shadow: 0 0 0 1px #409eff inset !important;
-            }
-          }
-          
-          .el-input__inner {
-            font-size: 14px !important;
-            color: #303133 !important;
-          }
-        }
-      }
-    }
   }
 }
 </style>

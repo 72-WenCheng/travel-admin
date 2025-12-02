@@ -169,16 +169,34 @@
               </template>
             </el-table-column>
           </el-table>
-          <div class="pagination-container-modern">
-            <el-pagination
-              v-model:current-page="userPagination.page"
-              v-model:page-size="userPagination.limit"
-              :total="userPagination.total"
-              :page-sizes="[20, 50, 100]"
-              layout="total, sizes, prev, pager, next, jumper"
-              @size-change="loadUserPoints"
-              @current-change="loadUserPoints"
-            />
+          <div class="pagination-container-modern simple-pagination">
+            <el-button
+              class="page-btn"
+              :disabled="userPagination.page <= 1"
+              @click="handleUserPageChange(userPagination.page - 1)"
+            >
+              <el-icon><ArrowLeft /></el-icon>
+            </el-button>
+            <span class="page-info">
+              {{ userPagination.page }} / {{ Math.max(1, Math.ceil((userPagination.total || 1) / (userPagination.limit || 20))) }}
+            </span>
+            <el-button
+              class="page-btn"
+              :disabled="userPagination.page >= Math.ceil((userPagination.total || 1) / (userPagination.limit || 20))"
+              @click="handleUserPageChange(userPagination.page + 1)"
+            >
+              <el-icon><ArrowRight /></el-icon>
+            </el-button>
+            <div class="page-jump">
+              <span>前往</span>
+              <el-input
+                v-model.number="userPageJump"
+                size="small"
+                class="page-jump-input"
+                @input="handleUserPageJump"
+              />
+              <span>页</span>
+            </div>
           </div>
         </el-card>
       </el-tab-pane>
@@ -249,16 +267,34 @@
               </template>
             </el-table-column>
           </el-table>
-          <div class="pagination-container-modern">
-            <el-pagination
-              v-model:current-page="logPagination.page"
-              v-model:page-size="logPagination.limit"
-              :total="logPagination.total"
-              :page-sizes="[20, 50, 100]"
-              layout="total, sizes, prev, pager, next, jumper"
-              @size-change="loadPointsLogs"
-              @current-change="loadPointsLogs"
-            />
+          <div class="pagination-container-modern simple-pagination">
+            <el-button
+              class="page-btn"
+              :disabled="logPagination.page <= 1"
+              @click="handleLogPageChange(logPagination.page - 1)"
+            >
+              <el-icon><ArrowLeft /></el-icon>
+            </el-button>
+            <span class="page-info">
+              {{ logPagination.page }} / {{ Math.max(1, Math.ceil((logPagination.total || 1) / (logPagination.limit || 20))) }}
+            </span>
+            <el-button
+              class="page-btn"
+              :disabled="logPagination.page >= Math.ceil((logPagination.total || 1) / (logPagination.limit || 20))"
+              @click="handleLogPageChange(logPagination.page + 1)"
+            >
+              <el-icon><ArrowRight /></el-icon>
+            </el-button>
+            <div class="page-jump">
+              <span>前往</span>
+              <el-input
+                v-model.number="logPageJump"
+                size="small"
+                class="page-jump-input"
+                @input="handleLogPageJump"
+              />
+              <span>页</span>
+            </div>
           </div>
         </el-card>
       </el-tab-pane>
@@ -296,8 +332,8 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="adjustDialogVisible = false" size="large">取消</el-button>
-        <el-button type="primary" @click="submitAdjust" size="large">
+        <el-button @click="adjustDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitAdjust">
           确认调整
         </el-button>
       </template>
@@ -310,7 +346,8 @@ import { ref, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
   Coin, Edit, User, TrendCharts, DataLine, Filter, Search, 
-  Refresh, Trophy, Document, Check, Select, Delete, CloseBold
+  Refresh, Trophy, Document, Check, Select, Delete, CloseBold,
+  ArrowLeft, ArrowRight
 } from '@element-plus/icons-vue'
 import request from '@/utils/request'
 import { resolvePaginationTotal } from '@/utils/pagination'
@@ -334,9 +371,26 @@ const userFilter = ref({
 })
 const userPagination = ref({
   page: 1,
-  limit: 20,
+  limit: 10,
   total: 0
 })
+
+const userPageJump = ref(null)
+
+const handleUserPageChange = page => {
+  userPagination.value.page = page
+  loadUserPoints()
+}
+
+const handleUserPageJump = () => {
+  const totalPages = Math.max(1, Math.ceil((userPagination.value.total || 1) / (userPagination.value.limit || 20)))
+  let target = Number(userPageJump.value || 1)
+  if (!Number.isFinite(target)) return
+  if (target < 1) target = 1
+  if (target > totalPages) target = totalPages
+  if (target === userPagination.value.page) return
+  handleUserPageChange(target)
+}
 
 // 积分明细列表
 const pointsLogsList = ref([])
@@ -346,9 +400,27 @@ const logFilter = ref({
 })
 const logPagination = ref({
   page: 1,
-  limit: 20,
+  limit: 10,
   total: 0
 })
+
+// 日志翻页跳转
+const logPageJump = ref(null)
+
+const handleLogPageChange = page => {
+  logPagination.value.page = page
+  loadPointsLogs()
+}
+
+const handleLogPageJump = () => {
+  const totalPages = Math.max(1, Math.ceil((logPagination.value.total || 1) / (logPagination.value.limit || 20)))
+  let target = Number(logPageJump.value || 1)
+  if (!Number.isFinite(target)) return
+  if (target < 1) target = 1
+  if (target > totalPages) target = totalPages
+  if (target === logPagination.value.page) return
+  handleLogPageChange(target)
+}
 
 // 调整积分
 const adjustDialogVisible = ref(false)
@@ -704,6 +776,15 @@ onMounted(() => {
   .el-dialog__body {
     padding-top: 12px !important;
   }
+
+  .el-dialog__footer {
+    .el-button {
+      padding: 6px 16px;
+      min-width: 80px;
+      font-size: 13px;
+      border-radius: 4px;
+    }
+  }
 }
 
 // 全局覆盖
@@ -804,6 +885,18 @@ onMounted(() => {
   background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
   border-radius: 2px;
   margin-bottom: 20px;
+}
+
+/* 取消积分管理列表“明细 / 调整”操作按钮的悬停模糊、放大等效果 */
+:deep(.action-buttons .el-button) {
+  transition: none !important;
+}
+
+:deep(.action-buttons .el-button:hover),
+:deep(.action-buttons .el-button:focus) {
+  transform: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
 }
 </style>
 

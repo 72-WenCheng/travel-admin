@@ -49,6 +49,7 @@
         <span>筛选条件</span>
       </div>
       <el-form :model="searchForm" class="filter-form">
+        <!-- 第一行：三个筛选条件 -->
         <div class="filter-row">
           <el-form-item label="公告类型">
             <el-select v-model="searchForm.type" placeholder="请选择公告类型" clearable>
@@ -65,15 +66,17 @@
               <el-option label="已下架" :value="2" />
             </el-select>
           </el-form-item>
-          <el-form-item label="关键词" style="flex: 1;">
+          <el-form-item label="关键词">
             <el-input 
               v-model="searchForm.keyword" 
               placeholder="请输入标题或内容关键词" 
-              clearable 
-              prefix-icon="Search"
+              clearable
             />
           </el-form-item>
-          <el-form-item class="filter-actions">
+        </div>
+        <!-- 第二行：右侧重置按钮，结构与攻略管理一致 -->
+        <div class="filter-row">
+          <el-form-item label=" " class="filter-actions">
             <el-button class="reset-btn" @click="handleReset">
               重置筛选
             </el-button>
@@ -186,16 +189,34 @@
         </el-table>
       </div>
 
-      <div class="pagination-container-modern">
-        <el-pagination
-          v-model:current-page="pagination.current"
-          v-model:page-size="pagination.size"
-          :page-sizes="[10, 20, 50, 100]"
-          :total="pagination.total"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+      <div class="pagination-container-modern simple-pagination">
+        <el-button
+          class="page-btn"
+          :disabled="pagination.current <= 1"
+          @click="handleCurrentChange(pagination.current - 1)"
+        >
+          <el-icon><ArrowLeft /></el-icon>
+        </el-button>
+        <span class="page-info">
+          {{ pagination.current }} / {{ Math.max(1, Math.ceil((pagination.total || 1) / (pagination.size || 10))) }}
+        </span>
+        <el-button
+          class="page-btn"
+          :disabled="pagination.current >= Math.ceil((pagination.total || 1) / (pagination.size || 10))"
+          @click="handleCurrentChange(pagination.current + 1)"
+        >
+          <el-icon><ArrowRight /></el-icon>
+        </el-button>
+        <div class="page-jump">
+          <span>前往</span>
+          <el-input
+            v-model.number="pageJump"
+            size="small"
+            class="page-jump-input"
+            @input="handlePageJump"
+          />
+          <span>页</span>
+        </div>
       </div>
     </el-card>
 
@@ -367,6 +388,19 @@ const pagination = reactive({
   size: 10,
   total: 0
 })
+
+// 翻页跳转
+const pageJump = ref(null)
+
+const handlePageJump = () => {
+  const totalPages = Math.max(1, Math.ceil((pagination.total || 1) / (pagination.size || 10)))
+  let target = Number(pageJump.value || 1)
+  if (!Number.isFinite(target)) return
+  if (target < 1) target = 1
+  if (target > totalPages) target = totalPages
+  if (target === pagination.current) return
+  handleCurrentChange(target)
+}
 
 // 自动刷新定时器
 let refreshTimer: any = null
@@ -749,7 +783,7 @@ onUnmounted(() => {
 </script>
 
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import '@/styles/admin-list.scss';
 
 .detail-content {
@@ -854,8 +888,8 @@ onUnmounted(() => {
   }
 }
 
-// 覆盖本页表格行悬停效果（去掉放大和阴影）
-.modern-table {
+// 覆盖本页表格行悬停效果（去掉放大和阴影，仅影响公告管理这张表）
+.table-card-modern .modern-table {
   :deep(.el-table__body tr:hover) {
     background: #f5f7fa !important;
     transform: none !important;

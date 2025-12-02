@@ -840,20 +840,7 @@ const viewRejectReason = (plan: any) => {
   const reason = plan.rejectReason || '管理员未提供详细说明'
   ElMessageBox.alert(
     `<div style="line-height: 1.8; padding: 10px;">
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #FEF0F0;">
-        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #F56C6C 0%, #FF8A8A 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-          <span style="color: white; font-size: 24px;">⚠</span>
-        </div>
-        <div>
-          <p style="color: #F56C6C; font-weight: bold; font-size: 16px; margin: 0;">审核未通过</p>
-          <p style="color: #909399; font-size: 12px; margin: 3px 0 0 0;">Audit Rejected</p>
-        </div>
-      </div>
-      
       <div style="margin-bottom: 20px;">
-        <p style="color: #606266; font-weight: 600; font-size: 14px; margin-bottom: 10px;">
-          📋 拒绝原因：
-        </p>
         <div style="background: linear-gradient(135deg, #FEF0F0 0%, #FFF5F5 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #F56C6C; box-shadow: 0 2px 8px rgba(245, 108, 108, 0.1);">
           <p style="color: #F56C6C; font-size: 14px; line-height: 1.8; margin: 0; white-space: pre-wrap;">
             ${reason}
@@ -868,7 +855,7 @@ const viewRejectReason = (plan: any) => {
         </p>
       </div>
     </div>`,
-    '审核拒绝详情',
+    '',
     {
       confirmButtonText: '知道了',
       dangerouslyUseHTMLString: true,
@@ -1565,15 +1552,57 @@ onUnmounted(() => {
           align-items: center;
           justify-content: flex-end;
           
+          // 状态流转按钮：统一的阳光暖色系样式，简单但不压抑
           .action-btn {
-            border-radius: 4px;
-            padding: 6px 16px;
+            border-radius: 8px;          // 更接近“正方形”的大块按钮
+            padding: 10px 22px;
             font-weight: 500;
-            transition: none;
+            font-size: 13px;
+            border: none;
+            background: #FFF7E6; // 柔和暖黄色
+            color: #8A6116;
+            box-shadow: none !important;
+            transform: none !important;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            min-width: 92px;
+            min-height: 36px;
+            justify-content: center;
+            
+            .el-icon {
+              font-size: 14px;
+            }
             
             &:hover {
-              transform: none !important;
-              box-shadow: none !important;
+              background: #FFE8BF;
+              color: #70480F;
+            }
+            
+            // 覆盖 Element Plus 默认 type 颜色，统一风格
+            &.el-button--primary {
+              color: #8A6116;
+              
+              // 编辑按钮：悬停时不要出现额外背景变化，保持静止
+              &:hover {
+                background: #FFF7E6;
+                color: #8A6116;
+              }
+            }
+            
+            &.el-button--success {
+              color: #3F7F32;
+              background: #F1FCEB;
+            }
+            
+            &.el-button--warning {
+              color: #B96B0D;
+              background: #FFF3D6;
+            }
+            
+            &.el-button--danger {
+              color: #F56C6C;
+              background: #FFECEC;
             }
           }
           
@@ -1928,9 +1957,10 @@ onUnmounted(() => {
       font-weight: 500;
       
       &:hover {
-        background: linear-gradient(135deg, #66B1FF 0%, #79BBFF 100%);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+        // 去掉“知道了”按钮的悬停动效，保持静止
+        background: linear-gradient(135deg, #409EFF 0%, #66B1FF 100%);
+        transform: none;
+        box-shadow: none;
       }
     }
   }

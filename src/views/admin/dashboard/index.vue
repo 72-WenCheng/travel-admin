@@ -16,7 +16,7 @@
         </div>
       </div>
       <div class="header-right">
-        <el-button @click="exportData">
+        <el-button type="success" class="action-btn export-btn" @click="exportData">
           <el-icon><Download /></el-icon>
           导出报表
         </el-button>
@@ -800,7 +800,6 @@
               <span>系统功能使用分析</span>
               <div class="header-subtitle">
                 核心模块使用情况 · 数据驱动决策
-                <span class="range-chip simple">{{ functionUsageRangeLabel }}</span>
               </div>
             </div>
           </template>
@@ -1194,7 +1193,34 @@ const defaultWorldMapData: WorldCountryStat[] = [
   { code: 'ZA', name: 'South Africa', cnName: '南非', visits: 1880, queries: 420, avgDuration: 117 }
 ]
 
-const worldMapData = ref<WorldCountryStat[]>([...defaultWorldMapData])
+const aggregateWorldStats = (data: WorldCountryStat[]): WorldCountryStat[] => {
+  const countryMap = new Map<string, WorldCountryStat>()
+
+  data.forEach(item => {
+    if (!item) return
+    const code = (item.code || item.name || '').toUpperCase()
+    if (!code) return
+
+    if (!countryMap.has(code)) {
+      countryMap.set(code, {
+        ...item,
+        code,
+        name: item.name || item.cnName || code,
+        cnName: item.cnName || item.name || code
+      })
+      return
+    }
+
+    const target = countryMap.get(code)!
+    target.visits = (target.visits || 0) + (item.visits || 0)
+    target.queries = (target.queries || 0) + (item.queries || 0)
+    target.avgDuration = item.avgDuration || target.avgDuration || 0
+  })
+
+  return Array.from(countryMap.values())
+}
+
+const worldMapData = ref<WorldCountryStat[]>(aggregateWorldStats(defaultWorldMapData))
 const worldSelectedCountry = ref<WorldCountryStat | null>(worldMapData.value[0] || null)
 const worldSearch = ref('')
 const worldMapOption = ref<any>({
@@ -1317,7 +1343,7 @@ const loadGlobalTraffic = async (options: { silent?: boolean } = {}) => {
     await ensureWorldMapRegistered()
     const result = await request.get('/statistics/world-traffic')
     if (result.code === 200 && Array.isArray(result.data)) {
-      worldMapData.value = result.data.map((item: any) => ({
+      const mapped = result.data.map((item: any) => ({
         code: item.code || item.countryCode || item.isoCode || item.name,
         name: item.name || item.country || item.countryEn || item.code,
         cnName: item.cnName || item.countryCn || item.nameCn || item.name,
@@ -1325,6 +1351,7 @@ const loadGlobalTraffic = async (options: { silent?: boolean } = {}) => {
         queries: item.queries || item.search || item.query || 0,
         avgDuration: item.avgDuration || item.duration || 0
       }))
+      worldMapData.value = aggregateWorldStats(mapped)
       success = true
     } else if (!silent) {
       ElMessage.warning('未获取到全球访问数据，使用示例数据')
@@ -2627,9 +2654,9 @@ const loadFunctionUsage = async (suppressError = true) => {
         }
 
         &:hover {
-          border-color: #dcdfe6;
+          border-color: #909399;
           color: #606266;
-          background: #f5f7fa;
+          background: #fff;
         }
 
         &:active,
@@ -2645,8 +2672,8 @@ const loadFunctionUsage = async (suppressError = true) => {
           background: #fff;
 
           &:hover {
-            background: #f5f7fa;
-            border-color: #dcdfe6;
+            background: #fff;
+            border-color: #909399;
             color: #606266;
           }
 
@@ -2674,6 +2701,30 @@ const loadFunctionUsage = async (suppressError = true) => {
             box-shadow: 0 0 0 2px #303133 !important;
             outline: none !important;
           }
+        }
+      }
+
+      .action-btn {
+        border-color: #dcdfe6 !important;
+        color: #606266 !important;
+        background: #fff !important;
+        font-weight: 500;
+        box-shadow: none;
+
+        .el-icon {
+          color: #606266 !important;
+        }
+
+        &:hover {
+          border-color: #c0c4cc !important;
+          color: #606266 !important;
+          background: #fff !important;
+        }
+
+        &.el-button--success {
+          border-color: #dcdfe6 !important;
+          color: #606266 !important;
+          background: #fff !important;
         }
       }
     }
@@ -3841,43 +3892,49 @@ const loadFunctionUsage = async (suppressError = true) => {
 
     .world-map-summary {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
 
+      @media (max-width: 1200px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
       .summary-item {
-        background: #f9fafb;
-        border-radius: 12px;
-        padding: 12px;
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 16px 18px;
         display: flex;
         flex-direction: column;
         gap: 6px;
+        border: 1px solid #edf2f7;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
 
         .label {
           font-size: 12px;
-          color: #9ca3af;
+          color: #94a3b8;
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
 
         .value {
-          font-size: 20px;
+          font-size: 24px;
           font-weight: 700;
-          color: #111827;
+          color: #1f2937;
         }
       }
     }
 
     .world-map-list {
-      max-height: 280px;
+      max-height: 300px;
 
       .world-map-list-item {
         padding: 12px 14px;
         border-radius: 12px;
-        border: 1px solid rgba(0, 0, 0, 0.04);
+        border: 1px solid rgba(15, 23, 42, 0.06);
         margin-bottom: 10px;
-        background: #fff;
+        background: #fbfcfe;
         cursor: pointer;
-          transition: border-color 0.2s ease, background-color 0.2s ease;
+        transition: all 0.2s ease;
 
         .item-header {
           display: flex;
@@ -3896,20 +3953,19 @@ const loadFunctionUsage = async (suppressError = true) => {
         }
 
         &.active {
-          border-color: rgba(79, 172, 254, 0.5);
-          background: linear-gradient(135deg, rgba(79, 172, 254, 0.08), rgba(0, 242, 254, 0.08));
+          border-color: rgba(14, 165, 233, 0.6);
+          background: #e0f2fe;
         }
 
-          // 悬停时不再上浮和增加阴影，保持简洁
-          &:hover {
-            transform: none;
-            box-shadow: none;
-          }
+        &:hover {
+          border-color: rgba(14, 165, 233, 0.3);
+          background: #eef6ff;
+        }
       }
 
       .world-map-empty {
         text-align: center;
-        color: #9ca3af;
+        color: #94a3b8;
         padding: 12px 0;
       }
     }
@@ -3917,15 +3973,16 @@ const loadFunctionUsage = async (suppressError = true) => {
     .world-map-detail {
       border-radius: 14px;
       padding: 16px;
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(79, 70, 229, 0.08));
+      background: #f4f7ff;
       display: flex;
       flex-direction: column;
       gap: 10px;
+      border: 1px solid rgba(15, 23, 42, 0.08);
 
       .detail-title {
         font-size: 15px;
         font-weight: 700;
-        color: #1f2937;
+        color: #111827;
       }
 
       .detail-row {
@@ -3935,7 +3992,7 @@ const loadFunctionUsage = async (suppressError = true) => {
         color: #4b5563;
 
         strong {
-          color: #111827;
+          color: #0f172a;
           font-size: 15px;
         }
       }
@@ -4050,25 +4107,21 @@ const loadFunctionUsage = async (suppressError = true) => {
         }
         
         &:hover {
-          transform: translateY(-6px) scale(1.02);
-          border-color: rgba(64, 158, 255, 0.4);
+          transform: none;
+          border-color: rgba(64, 158, 255, 0.25);
           box-shadow: 
-            0 20px 60px rgba(64, 158, 255, 0.15),
-            0 8px 24px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.8);
-          
+            0 10px 30px rgba(64, 158, 255, 0.08),
+            0 4px 12px rgba(0, 0, 0, 0.06),
+            inset 0 1px 0 rgba(255, 255, 255, 0.7);
           &::before,
           &::after {
-            opacity: 1;
+            opacity: 0;
           }
           
-          .card-icon {
-            transform: scale(1.15) rotate(8deg);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
-          }
-          
+          .card-icon,
           .card-rank {
-            transform: scale(1.1) rotate(5deg);
+            transform: none;
+            box-shadow: none;
           }
         }
         

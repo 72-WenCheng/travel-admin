@@ -709,22 +709,65 @@
 
         <!-- 安全设置 -->
         <el-tab-pane label="安全设置" name="security">
-          <el-form ref="securityFormRef" :model="securityForm" :rules="securityFormRules" label-width="120px" class="profile-form">
-            <el-form-item label="当前密码" prop="oldPassword">
-              <el-input v-model="securityForm.oldPassword" type="password" show-password placeholder="请输入当前密码" />
-            </el-form-item>
-            <el-form-item label="新密码" prop="newPassword">
-              <el-input v-model="securityForm.newPassword" type="password" show-password placeholder="请输入新密码" />
-            </el-form-item>
-            <el-form-item label="确认密码" prop="confirmPassword">
-              <el-input v-model="securityForm.confirmPassword" type="password" show-password placeholder="请再次输入新密码" />
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="changePassword" :loading="saving">
-                修改密码
-              </el-button>
-            </el-form-item>
-          </el-form>
+          <div class="security-panel">
+            <div class="security-panel__header">
+              <div class="security-panel__title">
+                <span>账户安全</span>
+                <h3>修改登录密码</h3>
+              </div>
+              <div class="security-panel__badge">
+                <div class="badge-dot"></div>
+                <span>White·Grey Minimal</span>
+              </div>
+            </div>
+            <p class="security-panel__desc">
+              使用 9 位以内的新密码，保持纯净的白灰界面节奏。建议定期更新，避免与其他平台复用。
+            </p>
+            <el-form
+              ref="securityFormRef"
+              :model="securityForm"
+              :rules="securityFormRules"
+              label-width="120px"
+              label-position="top"
+              class="profile-form security-form"
+            >
+              <div class="security-form__fields">
+                <el-form-item label="原密码" prop="oldPassword">
+                  <el-input
+                    v-model="securityForm.oldPassword"
+                    type="password"
+                    show-password
+                    placeholder="请输入原密码"
+                  />
+                </el-form-item>
+                <el-form-item label="新密码" prop="newPassword">
+                  <el-input
+                    v-model="securityForm.newPassword"
+                    type="password"
+                    show-password
+                    placeholder="请输入新密码（至少9位）"
+                  />
+                </el-form-item>
+                <el-form-item label="确认新密码" prop="confirmPassword">
+                  <el-input
+                    v-model="securityForm.confirmPassword"
+                    type="password"
+                    show-password
+                    placeholder="请再次输入新密码"
+                  />
+                </el-form-item>
+              </div>
+              <div class="security-form__actions">
+                <el-button type="primary" @click="changePassword" :loading="saving">
+                  保存新密码
+                </el-button>
+              </div>
+            </el-form>
+            <div class="security-panel__note">
+              <span>提示</span>
+              <p>密码更新后将在 30 秒内同步至所有端，确保在安静环境下完成操作。</p>
+            </div>
+          </div>
         </el-tab-pane>
       </el-tabs>
     </el-card>
@@ -1807,6 +1850,143 @@ onMounted(() => {
     &:hover {
       transform: translateY(-1px);
     }
+  }
+}
+
+.security-panel {
+  background: #ffffff;
+  border: 1px solid #edf0f4;
+  border-radius: 18px;
+  padding: 32px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  color: #3c4048;
+}
+
+.security-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.security-panel__title {
+  span {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: #b5b9c2;
+    margin-bottom: 6px;
+  }
+  
+  h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #2f3135;
+  }
+}
+
+.security-panel__badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid #eaecf2;
+  background: #fbfbfd;
+  color: #7b818b;
+  font-size: 13px;
+  
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #b6bcc7;
+  }
+}
+
+.security-panel__desc {
+  margin: 0;
+  color: #7d818b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.security-form {
+  padding: 0;
+  
+  :deep(.el-form-item) {
+    margin-bottom: 0;
+  }
+  
+  :deep(.el-input__wrapper) {
+    background: #f8f9fb;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    transition: border-color 0.2s ease;
+    
+    &:hover {
+      border-color: #d6dbe5;
+    }
+    
+    &.is-focus {
+      border-color: #b8beca;
+      box-shadow: none;
+    }
+  }
+  
+  :deep(.el-form-item__label) {
+    color: #9a9fab;
+    font-size: 13px;
+  }
+}
+
+.security-form__fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+.security-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  
+  :deep(.el-button--primary) {
+    background: #2f3135;
+    border-color: #2f3135;
+    padding: 12px 32px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    
+    &:hover {
+      background: #1f2023;
+      border-color: #1f2023;
+    }
+  }
+}
+
+.security-panel__note {
+  border-radius: 14px;
+  border: 1px dashed #e0e2e8;
+  padding: 18px 20px;
+  background: #f9fafc;
+  color: #7b818b;
+  font-size: 13px;
+  line-height: 1.6;
+  
+  span {
+    display: inline-block;
+    font-weight: 600;
+    color: #5a5f68;
+    margin-bottom: 4px;
+  }
+  
+  p {
+    margin: 0;
   }
 }
 

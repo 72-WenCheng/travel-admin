@@ -237,24 +237,42 @@
       </el-table>
 
       <!-- 分页 -->
-      <div class="pagination-container-modern">
-        <el-pagination
-          v-model:current-page="pagination.current"
-          v-model:page-size="pagination.size"
-          :page-sizes="[10, 20, 50, 100]"
-          :total="pagination.total"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+      <div class="pagination-container-modern simple-pagination">
+        <el-button
+          class="page-btn"
+          :disabled="pagination.current <= 1"
+          @click="handleCurrentChange(pagination.current - 1)"
+        >
+          <el-icon><ArrowLeft /></el-icon>
+        </el-button>
+        <span class="page-info">
+          {{ pagination.current }} / {{ Math.max(1, Math.ceil((pagination.total || 1) / (pagination.size || 10))) }}
+        </span>
+        <el-button
+          class="page-btn"
+          :disabled="pagination.current >= Math.ceil((pagination.total || 1) / (pagination.size || 10))"
+          @click="handleCurrentChange(pagination.current + 1)"
+        >
+          <el-icon><ArrowRight /></el-icon>
+        </el-button>
+        <div class="page-jump">
+          <span>前往</span>
+          <el-input
+            v-model.number="pageJump"
+            size="small"
+            class="page-jump-input"
+            @input="handlePageJump"
+          />
+          <span>页</span>
+        </div>
       </div>
     </el-card>
 
-    <!-- 编辑对话框 -->
+    <!-- 编辑 / 添加轮播图对话框 -->
     <el-dialog
       v-model="dialogVisible"
       :title="dialogTitle"
-      width="800px"
+      width="920px"
       class="modern-dialog"
       @close="resetForm"
     >
@@ -518,6 +536,19 @@ const pagination = reactive({
   size: 10,
   total: 0
 })
+
+// 翻页跳转
+const pageJump = ref(null)
+
+const handlePageJump = () => {
+  const totalPages = Math.max(1, Math.ceil((pagination.total || 1) / (pagination.size || 10)))
+  let target = Number(pageJump.value || 1)
+  if (!Number.isFinite(target)) return
+  if (target < 1) target = 1
+  if (target > totalPages) target = totalPages
+  if (target === pagination.current) return
+  handleCurrentChange(target)
+}
 
 const formData = reactive<any>({
   id: null,
@@ -976,6 +1007,54 @@ onUnmounted(() => {
   display: block;
 }
 
+/* 添加 / 编辑轮播图对话框整体放大 + 表单内容放大 */
+.modern-dialog {
+  :deep(.el-dialog__header) {
+    padding: 18px 24px 8px;
+  }
+
+  :deep(.el-dialog__title) {
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  :deep(.el-dialog__body) {
+    padding: 20px 24px 10px;
+  }
+
+  :deep(.edit-form) {
+    .el-form-item {
+      margin-bottom: 18px;
+    }
+
+    .el-form-item__label {
+      font-size: 15px;
+      font-weight: 500;
+      color: #303133;
+    }
+
+    .el-input__wrapper,
+    .el-textarea__inner,
+    .el-select__wrapper,
+    .el-date-editor.el-input__wrapper,
+    .el-input-number .el-input__wrapper {
+      min-height: 42px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .el-input__inner,
+    .el-textarea__inner {
+      font-size: 14px;
+    }
+
+    .el-radio,
+    .el-radio__label {
+      font-size: 14px;
+    }
+  }
+}
+
 // 图片预览对话框
 :deep(.image-preview-dialog) {
   .el-dialog__body {
@@ -1240,12 +1319,26 @@ onUnmounted(() => {
   justify-content: flex-end;
   gap: 12px;
 
-  .secondary-btn {
+  .secondary-btn,
+  .primary-btn {
     border-radius: 6px;
     background: #fff;
     border: 1px solid #dcdfe6;
-    color: #606266;
+    color: #606266 !important;
     font-weight: 500;
+    box-shadow: none;
+
+    &:hover,
+    &:focus,
+    &:active {
+      background: #f5f7fa !important;
+      border-color: #c0c4cc !important;
+      color: #303133 !important;
+      box-shadow: none !important;
+    }
+  }
+
+  .secondary-btn {
 
     &:hover {
       background: #f5f7fa;
@@ -1256,16 +1349,6 @@ onUnmounted(() => {
 
   .primary-btn {
     border-radius: 6px;
-    background: #f5f7fa;
-    border: 1px solid #dcdfe6;
-    color: #303133;
-    font-weight: 600;
-    box-shadow: none;
-
-    &:hover:not([disabled]) {
-      background: #e9ebf0;
-    }
-
     &[disabled] {
       background: #f5f7fa;
       color: #c0c4cc;

@@ -216,11 +216,7 @@
       <template #header>
         <div class="dialog-header-custom">
           <div class="dialog-title">{{ currentAnnouncement?.title || '公告详情' }}</div>
-        </div>
-      </template>
-      <div v-if="currentAnnouncement" class="announcement-detail">
-        <div class="announcement-header">
-          <div class="announcement-meta">
+          <div v-if="currentAnnouncement" class="dialog-subtitle">
             <el-tag :type="getAnnouncementTypeTag(currentAnnouncement.type)" size="default" class="type-tag">
               {{ getAnnouncementTypeName(currentAnnouncement.type) }}
             </el-tag>
@@ -230,6 +226,8 @@
             </span>
           </div>
         </div>
+      </template>
+      <div v-if="currentAnnouncement" class="announcement-detail">
         <div class="announcement-content">
           <div class="content-text" v-html="formatContent(currentAnnouncement.content)"></div>
         </div>
@@ -5959,6 +5957,31 @@ onMounted(() => {
         font-weight: 600 !important;
         color: #303133 !important;
         line-height: 1.4;
+        margin-bottom: 4px;
+      }
+
+      .dialog-subtitle {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 4px;
+
+        .type-tag {
+          font-size: 12px;
+          padding: 4px 10px;
+        }
+
+        .announcement-date {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 12px;
+          color: #909399;
+
+          .date-icon {
+            font-size: 14px;
+          }
+        }
       }
     }
   }

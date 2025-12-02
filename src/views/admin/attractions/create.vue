@@ -5,8 +5,8 @@
     <!-- 页面头部 -->
     <div class="page-header">
       <div class="header-actions">
-        <el-button @click="handleCancel" :disabled="loading">取消</el-button>
-        <el-button type="primary" @click="handleSubmit" :loading="loading">
+        <el-button class="action-btn" @click="handleCancel" :disabled="loading">取消</el-button>
+        <el-button class="action-btn confirm-btn" @click="handleSubmit" :loading="loading">
           {{ loading ? '提交中...' : '确定' }}
         </el-button>
       </div>
@@ -217,8 +217,14 @@
         >
           <el-icon><Plus /></el-icon>
         </el-upload>
-        <el-dialog v-model="dialogVisible" width="50%">
-          <img w-full :src="dialogImageUrl" alt="预览" />
+        <el-dialog
+          v-model="dialogVisible"
+          width="60%"
+          class="image-preview-dialog"
+        >
+          <div class="image-preview-wrapper">
+            <img :src="dialogImageUrl" alt="预览" />
+          </div>
         </el-dialog>
         <div class="upload-tip">支持jpg/png格式，最多9张，建议尺寸800x600，第一张将作为封面图</div>
       </el-form-item>
@@ -898,30 +904,53 @@ const handleSubmit = async () => {
 
 <style lang="scss" scoped>
 .create-attraction {
-  padding: 20px;
+  padding: 24px;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  background: #f5f7fa;
   
   .page-header {
     display: flex;
     justify-content: flex-end;
     align-items: center;
     margin-bottom: 20px;
+    padding: 16px 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     
     .header-actions {
       display: flex;
       gap: 12px;
+      
+      .action-btn {
+        border-radius: 4px;
+        padding: 8px 20px;
+        font-weight: 500;
+        background-color: #ffffff;
+        border: 1px solid #dcdfe6;
+        color: #606266;
+        transition: none;
+        
+        &:hover {
+          background-color: #f5f7fa;
+          border-color: #c0c4cc;
+          color: #606266;
+          box-shadow: none;
+          transform: none;
+        }
+        
+        &.confirm-btn {
+          font-weight: 600;
+        }
+      }
     }
   }
   
   .form-card {
-    border-radius: 24px;
-    border: none;
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(10px);
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    border: 1px solid #e4e7ed;
+    background: #ffffff;
+    box-shadow: none;
     
     :deep(.el-card__body) {
       padding: 32px;
@@ -933,31 +962,44 @@ const handleSubmit = async () => {
         color: #606266;
         white-space: nowrap;
         word-break: keep-all;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        height: 44px;
+        padding-bottom: 0;
       }
       
       .el-input__wrapper,
       .el-textarea__inner {
-        border-radius: 12px;
-        transition: all 0.3s;
+        border-radius: 4px;
+        transition: none;
+        min-height: 44px;
+        border: 1px solid #dcdfe6 !important;
+        box-shadow: none !important;
+        background-color: #ffffff !important;
         
         &:hover {
-          box-shadow: 0 0 0 1px rgba(102, 126, 234, 0.2);
+          border: 1px solid #dcdfe6 !important;
+          box-shadow: none !important;
+          background-color: #ffffff !important;
         }
         
         &.is-focus {
-          box-shadow: 0 0 0 1px #667eea !important;
+          border: 1px solid #dcdfe6 !important;
+          box-shadow: none !important;
+          background-color: #ffffff !important;
         }
       }
       
       .el-input-number {
         .el-input__wrapper {
-          border-radius: 12px;
+          border-radius: 4px;
         }
       }
       
       .el-select {
         .el-input__wrapper {
-          border-radius: 12px;
+          border-radius: 4px;
         }
       }
       
@@ -965,16 +1007,17 @@ const handleSubmit = async () => {
         margin: 32px 0 24px;
         
         .el-divider__text {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
           font-size: 16px;
-          font-weight: 700;
-          background: linear-gradient(135deg, #667eea, #764ba2);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+          font-weight: 600;
+          color: #303133;
           
           .el-icon {
             margin-right: 8px;
             vertical-align: middle;
+            color: #303133;
           }
         }
       }
@@ -1008,13 +1051,38 @@ const handleSubmit = async () => {
   }
 }
 
+// 覆盖地址自动完成下拉框为白灰系风格
+::deep(.address-autocomplete) {
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e4e7ed;
+  
+  .el-autocomplete-suggestion__list {
+    padding: 8px 0;
+    
+    .el-autocomplete-suggestion__item {
+      padding: 12px 16px;
+      transition: background-color 0.15s ease;
+      
+      &:hover {
+        background: #f5f7fa;
+      }
+      
+      &.highlighted {
+        background: #f0f0f0;
+        color: #303133;
+      }
+    }
+  }
+}
+
 .address-suggestion {
   display: flex;
   align-items: flex-start;
   gap: 10px;
   
   .suggestion-icon {
-    color: #667eea;
+    color: #909399;
     font-size: 18px;
     margin-top: 2px;
     flex-shrink: 0;
@@ -1114,6 +1182,39 @@ const handleSubmit = async () => {
   font-size: 12px;
   color: #909399;
   margin-left: 8px;
+}
+
+/* 去除图片卡片上“按 Delete 键可删除”的文字提示，但保留删除按钮 */
+:deep(.el-upload-list__item::after) {
+  display: none !important;
+}
+
+/* 放大图片预览对话框样式优化为自适应白灰系 */
+.image-preview-dialog {
+  :deep(.el-dialog__body) {
+    padding: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+.image-preview-wrapper {
+  max-width: 100%;
+  max-height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  img {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    display: block;
+    border-radius: 4px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    background-color: #ffffff;
+  }
 }
 </style>
 

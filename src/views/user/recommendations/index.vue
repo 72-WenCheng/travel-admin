@@ -2084,13 +2084,16 @@ onMounted(() => {
 </style>
 
 <style lang="scss">
-// 选择目的地输入框focus样式 - 黑色边框（全局样式，确保优先级，移除所有蓝色）
+// 选择目的地输入框 focus 样式 - 只改颜色，不再放大或产生强烈阴影
 .recommendations-page .location-filter .el-select.location-select-black-focus,
 .recommendations-page .location-filter .location-select-black-focus {
-  // 禁用所有默认的 focus 效果
   .el-select__wrapper,
   .el-input__wrapper,
   .el-input .el-input__wrapper {
+    // 禁止任何缩放或大小动画，避免点击时“抖动”
+    transition: border-color 0.2s ease !important;
+    transform: none !important;
+
     &:focus,
     &:focus-visible,
     &.is-focus,
@@ -2098,16 +2101,12 @@ onMounted(() => {
       --el-input-focus-border-color: #303133 !important;
       --el-border-color: #303133 !important;
       --el-color-primary: #303133 !important;
-      border: 2px solid #303133 !important;
+      border-width: 1px !important; // 保持与未聚焦时一致，避免“放大抖动”
+      border-style: solid !important;
       border-color: #303133 !important;
-      box-shadow: 
-        0 8px 25px rgba(48, 49, 51, 0.25),
-        0 0 0 4px rgba(48, 49, 51, 0.1) !important;
+      box-shadow: none !important;  // 去掉额外阴影
+      transform: none !important;
       outline: none !important;
-      // 移除所有蓝色阴影
-      box-shadow: 
-        0 8px 25px rgba(48, 49, 51, 0.25),
-        0 0 0 4px rgba(48, 49, 51, 0.1) !important;
     }
   }
   
@@ -2121,11 +2120,10 @@ onMounted(() => {
       --el-input-focus-border-color: #303133 !important;
       --el-border-color: #303133 !important;
       --el-color-primary: #303133 !important;
-      border: 2px solid #303133 !important;
+      border-width: 1px !important;
+      border-style: solid !important;
       border-color: #303133 !important;
-      box-shadow: 
-        0 8px 25px rgba(48, 49, 51, 0.25),
-        0 0 0 4px rgba(48, 49, 51, 0.1) !important;
+      box-shadow: none !important;
       outline: none !important;
     }
   }
@@ -2141,11 +2139,10 @@ onMounted(() => {
     --el-input-focus-border-color: #303133 !important;
     --el-border-color: #303133 !important;
     --el-color-primary: #303133 !important;
-    border: 2px solid #303133 !important;
+    border-width: 1px !important;
+    border-style: solid !important;
     border-color: #303133 !important;
-    box-shadow: 
-      0 8px 25px rgba(48, 49, 51, 0.25),
-      0 0 0 4px rgba(48, 49, 51, 0.1) !important;
+    box-shadow: none !important;
     outline: none !important;
   }
 }
@@ -2156,11 +2153,10 @@ onMounted(() => {
   --el-input-focus-border-color: #303133 !important;
   --el-border-color: #303133 !important;
   --el-color-primary: #303133 !important;
-  border: 2px solid #303133 !important;
+  border-width: 1px !important;
+  border-style: solid !important;
   border-color: #303133 !important;
-  box-shadow: 
-    0 8px 25px rgba(48, 49, 51, 0.25),
-    0 0 0 4px rgba(48, 49, 51, 0.1) !important;
+  box-shadow: none !important;
   outline: none !important;
 }
 </style>

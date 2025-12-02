@@ -716,10 +716,6 @@ const handleContact = () => {
           transition: color 0.3s ease;
         }
         
-        &:hover {
-          color: #aaa;
-        }
-        
         &.active {
           color: #ffffff;
           
@@ -1201,3 +1197,21 @@ const handleContact = () => {
   }
 }
 </style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

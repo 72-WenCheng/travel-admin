@@ -424,8 +424,8 @@ const router = createRouter({
     if (savedPosition) {
       return savedPosition
     }
-    // 否则滚动到顶部
-    return { top: 0, left: 0, behavior: 'instant' }
+    // 默认每次进入新页面时滚动到顶部
+    return { left: 0, top: 0 }
   }
 })
 

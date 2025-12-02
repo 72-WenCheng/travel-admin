@@ -84,6 +84,7 @@
             <div class="chat-header-actions">
               <el-button
                 class="chat-btn"
+                type="default"
                 size="small"
                 :icon="User"
                 @click="viewProfile(selectedConversation.targetUserId)"
@@ -736,6 +737,7 @@ onBeforeUnmount(() => {
 <style scoped lang="scss">
 .message-page {
   padding: 24px;
+  background: #f5f7fb;
 }
 
 .message-layout {
@@ -748,7 +750,7 @@ onBeforeUnmount(() => {
   background: #fff;
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 10px 30px rgba(15, 76, 129, 0.06);
+  box-shadow: 0 6px 18px rgba(15, 76, 129, 0.04);
   display: flex;
   flex-direction: column;
   height: calc(100vh - 240px);
@@ -853,7 +855,7 @@ onBeforeUnmount(() => {
   border-radius: 16px;
   padding: 16px 20px;
   min-height: 500px;
-  box-shadow: 0 12px 34px rgba(10, 37, 64, 0.08);
+  box-shadow: 0 8px 24px rgba(10, 37, 64, 0.06);
   display: flex;
   flex-direction: column;
 
@@ -916,7 +918,7 @@ onBeforeUnmount(() => {
   }
 
   .chat-content {
-    padding: 0 16px 12px;
+    padding: 0 20px 12px;
   }
 }
 
@@ -930,7 +932,7 @@ onBeforeUnmount(() => {
     padding: 10px 14px;
     border-radius: 12px;
     max-width: 70%;
-    box-shadow: 0 6px 16px rgba(15, 76, 129, 0.08);
+    box-shadow: 0 2px 8px rgba(15, 76, 129, 0.06);
     position: relative;
   }
 
@@ -983,9 +985,9 @@ onBeforeUnmount(() => {
     flex-direction: row-reverse;
 
     .message-bubble {
-      background: linear-gradient(135deg, #409eff, #2f7bff);
+      background: linear-gradient(135deg, #5aa9ff, #2f7bff);
       color: #fff;
-      box-shadow: 0 6px 16px rgba(64, 158, 255, 0.35);
+      box-shadow: 0 4px 14px rgba(64, 158, 255, 0.28);
     }
 
     .message-text,
@@ -1055,25 +1057,26 @@ onBeforeUnmount(() => {
   }
 }
 
-:deep(.chat-btn) {
-  background-color: #fff;
+:deep(.chat-btn.el-button) {
+  background-color: #ffffff;
   border: 1px solid #dfe3eb;
   color: #4a5568;
   transition: all 0.2s ease;
   font-weight: 500;
-  padding: 8px 18px;
+  padding: 10px 22px !important; // 提高高度并增加左右留白
   font-size: 14px;
-  border-radius: 10px;
+  border-radius: 18px;
+  height: 38px !important; // 强制统一按钮高度，避免被 size 覆盖
 }
 
-:deep(.chat-btn:hover),
-:deep(.chat-btn:focus) {
+:deep(.chat-btn.el-button:hover),
+:deep(.chat-btn.el-button:focus) {
   background-color: #f5f7fa;
   border-color: #cfd5dd;
   color: #1f2d3d;
 }
 
-:deep(.chat-btn.is-disabled) {
+:deep(.chat-btn.el-button.is-disabled) {
   background-color: #f7f8fb;
   border-color: #e4e7ed;
   color: #c0c4cc;

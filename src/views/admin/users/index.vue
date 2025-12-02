@@ -282,16 +282,34 @@
       </el-table>
       </div>
 
-      <div class="pagination-container-modern">
-        <el-pagination
-          v-model:current-page="pagination.current"
-          v-model:page-size="pagination.size"
-          :page-sizes="[10, 20, 50, 100]"
-          :total="pagination.total"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+      <div class="pagination-container-modern simple-pagination">
+        <el-button
+          class="page-btn"
+          :disabled="pagination.current <= 1"
+          @click="handleCurrentChange(pagination.current - 1)"
+        >
+          <el-icon><ArrowLeft /></el-icon>
+        </el-button>
+        <span class="page-info">
+          {{ pagination.current }} / {{ Math.max(1, Math.ceil(pagination.total / pagination.size || 1)) }}
+        </span>
+        <el-button
+          class="page-btn"
+          :disabled="pagination.current >= Math.ceil(pagination.total / pagination.size || 1)"
+          @click="handleCurrentChange(pagination.current + 1)"
+        >
+          <el-icon><ArrowRight /></el-icon>
+        </el-button>
+        <div class="page-jump">
+          <span>前往</span>
+          <el-input
+            v-model.number="pageJump"
+            size="small"
+            class="page-jump-input"
+            @input="handlePageJump"
+          />
+          <span>页</span>
+        </div>
       </div>
     </el-card>
 
@@ -613,6 +631,19 @@ const pagination = reactive({
   size: 10,
   total: 0
 })
+
+// 翻页跳转
+const pageJump = ref<number | null>(null)
+
+const handlePageJump = () => {
+  const totalPages = Math.max(1, Math.ceil((pagination.total || 1) / (pagination.size || 10)))
+  let target = Number(pageJump.value || 1)
+  if (!Number.isFinite(target)) return
+  if (target < 1) target = 1
+  if (target > totalPages) target = totalPages
+  if (target === pagination.current) return
+  handleCurrentChange(target)
+}
 
 // 统计数据
 const userStats = ref({

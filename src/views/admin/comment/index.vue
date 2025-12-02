@@ -241,16 +241,34 @@
       </div>
 
       <!-- 分页 -->
-      <div class="pagination-container-modern">
-        <el-pagination
-          v-model:current-page="pagination.page"
-          v-model:page-size="pagination.pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          :total="pagination.total"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+      <div class="pagination-container-modern simple-pagination">
+        <el-button
+          class="page-btn"
+          :disabled="pagination.page <= 1"
+          @click="handleCurrentChange(pagination.page - 1)"
+        >
+          <el-icon><ArrowLeft /></el-icon>
+        </el-button>
+        <span class="page-info">
+          {{ pagination.page }} / {{ Math.max(1, Math.ceil((pagination.total || 1) / (pagination.pageSize || 10))) }}
+        </span>
+        <el-button
+          class="page-btn"
+          :disabled="pagination.page >= Math.ceil((pagination.total || 1) / (pagination.pageSize || 10))"
+          @click="handleCurrentChange(pagination.page + 1)"
+        >
+          <el-icon><ArrowRight /></el-icon>
+        </el-button>
+        <div class="page-jump">
+          <span>前往</span>
+          <el-input
+            v-model.number="pageJump"
+            size="small"
+            class="page-jump-input"
+            @input="handlePageJump"
+          />
+          <span>页</span>
+        </div>
       </div>
     </el-card>
   </div>
@@ -299,6 +317,19 @@ const pagination = reactive({
   pageSize: 10,
   total: 0
 });
+
+// 翻页跳转
+const pageJump = ref(null);
+
+const handlePageJump = () => {
+  const totalPages = Math.max(1, Math.ceil((pagination.total || 1) / (pagination.pageSize || 10)));
+  let target = Number(pageJump.value || 1);
+  if (!Number.isFinite(target)) return;
+  if (target < 1) target = 1;
+  if (target > totalPages) target = totalPages;
+  if (target === pagination.page) return;
+  handleCurrentChange(target);
+};
 
 // 格式化时间
 const formatTime = () => {

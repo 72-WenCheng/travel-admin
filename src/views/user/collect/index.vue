@@ -310,14 +310,18 @@ const getTypeText = (type: number) => {
   return typeMap[type] || '未知'
 }
 
-// 获取标签样式
+// 获取标签样式（柔和色块，简单又有区分度）
 const getBadgeStyle = (type: number) => {
   const styleMap: Record<number, string> = {
-    1: 'background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    2: 'background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-    3: 'background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
+    // 攻略：蓝色系
+    1: 'background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.35); color: #1d4ed8;',
+    // 景点：橙色系
+    2: 'background: rgba(249, 115, 22, 0.12); border: 1px solid rgba(249, 115, 22, 0.35); color: #c05621;',
+    // 文旅项目：绿色系
+    3: 'background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); color: #047857;'
   }
-  return styleMap[type] || 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+  // 默认使用蓝色
+  return styleMap[type] || styleMap[1]
 }
 
 // 格式化日期
@@ -1284,27 +1288,24 @@ const handleDelete = async (item: any) => {
         position: absolute;
         top: 12px;
         right: 12px;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: 600;
-        color: white;
-        display: flex;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 500;
+        display: inline-flex;
         align-items: center;
         gap: 6px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        transition: all 0.3s;
-        backdrop-filter: blur(10px);
+        box-shadow: none;
+        transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
         z-index: 2;
         
         &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+          filter: brightness(0.97);
         }
         
         .el-icon {
-          font-size: 16px;
-          color: white;
+          font-size: 14px;
+          opacity: 0.9;
         }
       }
     }

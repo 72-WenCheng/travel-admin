@@ -884,10 +884,11 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #fff;
   border-radius: 12px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  border: 1px solid #e5e7eb;
+  box-shadow: none;
 
   .header-left {
     display: flex;
@@ -897,12 +898,13 @@ onMounted(() => {
     .header-icon {
       width: 60px;
       height: 60px;
-      background: rgba(255, 255, 255, 0.2);
+      background: #f2f3f5;
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: #5f6673;
+      border: 1px solid #e4e6eb;
     }
 
     .header-title {
@@ -910,14 +912,14 @@ onMounted(() => {
         margin: 0;
         font-size: 28px;
         font-weight: 600;
-        color: white;
+        color: #2f3542;
         margin-bottom: 4px;
       }
 
       p {
         margin: 0;
         font-size: 14px;
-        color: rgba(255, 255, 255, 0.9);
+        color: #8a8f99;
       }
     }
   }
@@ -1021,12 +1023,12 @@ onMounted(() => {
 
       .day-number {
         padding: 8px 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-  border-radius: 8px;
+        background: #f2f3f5;
+        color: #2f3542;
+        border-radius: 8px;
         font-weight: 600;
         font-size: 13px;
-        box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+        border: 1px solid #e1e4ea;
       }
 
       .day-title {
@@ -1036,7 +1038,7 @@ onMounted(() => {
       }
     }
 
-    .day-content {
+      .day-content {
       .day-description {
         font-size: 15px;
         line-height: 1.8;
@@ -1044,7 +1046,7 @@ onMounted(() => {
         padding: 18px;
         background: #f9fafb;
         border-radius: 10px;
-        border-left: 4px solid #667eea;
+          border-left: 4px solid #e1e4ea;
       }
 
       .spots-list {
@@ -1060,8 +1062,8 @@ onMounted(() => {
           transition: all 0.2s ease;
 
           &:hover {
-            border-color: #c7d2fe;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+            border-color: #d8dce3;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
           }
 
           &:last-child {
@@ -1071,14 +1073,14 @@ onMounted(() => {
           .spot-icon {
             width: 44px;
             height: 44px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+            background: #f5f5f7;
+            color: #5f6673;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            box-shadow: 0 2px 6px rgba(102, 126, 234, 0.2);
+            border: 1px solid #e1e4ea;
 
             .el-icon {
               font-size: 20px;
@@ -1118,7 +1120,7 @@ onMounted(() => {
 
                 .el-icon {
                   font-size: 14px;
-                  color: #667eea;
+                  color: #9096a1;
                 }
               }
             }
@@ -1138,7 +1140,7 @@ onMounted(() => {
           top: 0;
           bottom: 0;
           width: 2px;
-          background: linear-gradient(to bottom, #667eea, #c7d2fe);
+          background: #e1e4ea;
         }
 
         .activity-item {
@@ -1154,8 +1156,8 @@ onMounted(() => {
           transition: all 0.2s ease;
 
           &:hover {
-            border-color: #c7d2fe;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.12);
+            border-color: #d8dce3;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
           }
 
           &:last-child {
@@ -1170,10 +1172,10 @@ onMounted(() => {
             top: 22px;
             width: 12px;
             height: 12px;
-            background: #667eea;
+            background: #d0d4db;
             border: 3px solid white;
             border-radius: 50%;
-            box-shadow: 0 0 0 2px #e5e7eb, 0 2px 4px rgba(102, 126, 234, 0.2);
+            box-shadow: 0 0 0 2px #e5e7eb;
             z-index: 1;
           }
 
@@ -1181,14 +1183,14 @@ onMounted(() => {
             min-width: 80px;
             font-size: 13px;
             font-weight: 600;
-            color: #ffffff;
+            color: #2f3542;
             padding: 8px 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f2f3f5;
             border-radius: 8px;
             text-align: center;
             flex-shrink: 0;
             height: fit-content;
-            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+            border: 1px solid #e1e4ea;
           }
 
           .activity-content {
@@ -1216,7 +1218,7 @@ onMounted(() => {
 
               .el-icon {
                 font-size: 14px;
-                color: #667eea;
+                color: #9096a1;
               }
             }
 
@@ -1255,13 +1257,7 @@ onMounted(() => {
       border-radius: 12px;
       text-align: center;
       border: 1px solid #e5e7eb;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-      transition: all 0.2s ease;
-
-      &:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        transform: translateY(-2px);
-      }
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
 
       .label {
         display: block;
@@ -1287,20 +1283,18 @@ onMounted(() => {
     }
 
     .budget-total {
-      border-top: 4px solid #667eea;
-      background: linear-gradient(to bottom, rgba(102, 126, 234, 0.02), #ffffff);
-      
+      border-top: 4px solid #dcdfe6;
+
       .value {
-        color: #667eea;
+        color: #2f3542;
       }
     }
 
     .budget-per-person {
-      border-top: 4px solid #ec4899;
-      background: linear-gradient(to bottom, rgba(236, 72, 153, 0.02), #ffffff);
-      
+      border-top: 4px solid #dcdfe6;
+
       .value {
-        color: #ec4899;
+        color: #2f3542;
       }
     }
   }
@@ -1309,7 +1303,7 @@ onMounted(() => {
     background: #ffffff;
     border-radius: 12px;
     border: 1px solid #e5e7eb;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
     overflow: hidden;
 
     .cost-item {
@@ -1318,12 +1312,6 @@ onMounted(() => {
       align-items: center;
       padding: 18px 22px;
       border-bottom: 1px solid #f3f4f6;
-      transition: all 0.2s ease;
-
-      &:hover {
-        background: #f9fafb;
-        padding-left: 26px;
-      }
 
       &:last-child {
         border-bottom: none;
@@ -1341,16 +1329,15 @@ onMounted(() => {
           content: '';
           width: 8px;
           height: 8px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: #d0d4db;
           border-radius: 50%;
-          box-shadow: 0 0 4px rgba(102, 126, 234, 0.3);
         }
       }
 
       .cost-value {
         font-size: 17px;
         font-weight: 600;
-        color: #667eea;
+        color: #2f3542;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       }
     }
@@ -1371,17 +1358,17 @@ onMounted(() => {
 
 /* 顶部图片预览区块 */
 .image-preview-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #fff;
+  color: #303133;
   margin-bottom: 24px;
 
   :deep(.el-card__header) {
-    background: rgba(255, 255, 255, 0.1);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    background: #fff;
+    border-bottom: 1px solid #f0f0f0;
     padding: 16px 20px;
 
     .card-header {
-      color: white;
+      color: #2f3542;
       font-weight: 600;
       font-size: 16px;
     }
@@ -1404,28 +1391,22 @@ onMounted(() => {
     height: 160px;
     border-radius: 12px;
     cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-
-    &:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-    }
+    box-shadow: none;
 
     :deep(img) {
       border-radius: 12px;
     }
   }
 
-  .image-error {
+.image-error {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100%;
-    background: rgba(255, 255, 255, 0.1);
+    background: #f5f6f8;
     border-radius: 12px;
-    color: rgba(255, 255, 255, 0.8);
+    color: #909399;
     font-size: 13px;
 
     .el-icon {
@@ -1519,11 +1500,11 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   padding: 60px 20px;
-  color: rgba(255, 255, 255, 0.9);
+    color: #606266;
   text-align: center;
 
   .el-icon {
-    color: rgba(255, 255, 255, 0.6);
+    color: #c0c4cc;
     margin-bottom: 16px;
   }
 
@@ -1531,13 +1512,13 @@ onMounted(() => {
     font-size: 18px;
     font-weight: 600;
     margin: 0 0 8px 0;
-    color: white;
+      color: #303133;
   }
 
   .tip-desc {
     font-size: 14px;
     margin: 0;
-    color: rgba(255, 255, 255, 0.7);
+      color: #909399;
   }
 }
 
@@ -1586,8 +1567,9 @@ onMounted(() => {
     align-items: center;
     gap: 16px;
     padding: 20px;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: #fff;
     border-radius: 12px;
+    border: 1px solid #e5e7eb;
 
     .stat-info {
       flex: 1;
@@ -1635,27 +1617,23 @@ onMounted(() => {
     height: 48px;
     font-size: 16px;
     font-weight: 600;
+    border: 1px solid #dcdfe6;
+    background: #fff;
+    color: #4b5563;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    
+    &:hover {
+      border-color: #c0c4cc;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(4, 9, 20, 0.08);
+    }
     
     &.el-button--success {
-      background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
-      border: none;
-      
-      &:hover {
-        background: linear-gradient(135deg, #5daf34 0%, #73c855 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(103, 194, 58, 0.4);
-      }
+      color: #2f9b46;
     }
     
     &.el-button--danger {
-      background: linear-gradient(135deg, #f56c6c 0%, #ff9a9e 100%);
-      border: none;
-      
-      &:hover {
-        background: linear-gradient(135deg, #e64444 0%, #ff7875 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(245, 108, 108, 0.4);
-      }
+      color: #c0392b;
     }
   }
 }
@@ -1663,21 +1641,22 @@ onMounted(() => {
 /* 审核拒绝对话框样式 */
 .reject-dialog {
   :deep(.el-dialog__header) {
-    background: linear-gradient(135deg, #f56c6c 0%, #ff9a9e 100%);
+    background: #fff;
+    border-bottom: 1px solid #f0f0f0;
     padding: 20px;
     
     .el-dialog__title {
-      color: white;
+      color: #303133;
       font-size: 20px;
       font-weight: bold;
     }
     
     .el-dialog__headerbtn .el-dialog__close {
-      color: white;
+      color: #909399;
       font-size: 20px;
       
       &:hover {
-        color: #fff;
+        color: #606266;
       }
     }
   }
@@ -1707,11 +1686,11 @@ onMounted(() => {
       font-size: 13px;
       
       &:hover {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-color: transparent;
+        background: #f2f3f5;
+        color: #303133;
+        border-color: #e1e4ea;
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        box-shadow: none;
       }
     }
   }

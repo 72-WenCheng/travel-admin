@@ -293,7 +293,7 @@ body *::-webkit-scrollbar {
           
           // Warning 图标
           &.el-message-box-icon--warning {
-            color: #faad14 !important;
+            color: #909399 !important; // 白灰黑系：中性灰
           }
           
           // Info 图标
@@ -358,52 +358,45 @@ body *::-webkit-scrollbar {
         transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
         padding: 0 20px !important;
         
-        // 取消按钮
+        // 默认 hover / focus 效果统一为灰色，避免蓝色主色残留
+        &:hover,
+        &:focus {
+          background: #f5f7fa !important;
+          border-color: #c0c4cc !important;
+          color: #606266 !important;
+          box-shadow: none !important;
+        }
+        
+        // 取消按钮 - 白灰系
         &.el-button--default {
-          border: 1px solid #d9d9d9 !important;
-          color: #595959 !important;
+          border: 1px solid #dcdfe6 !important;
+          color: #606266 !important;
           background: #ffffff !important;
+          box-shadow: none !important;
+          
+          &:active {
+            background: #f0f0f0 !important;
+            border-color: #c0c4cc !important;
+            color: #606266 !important;
+          }
+        }
+        
+        // 确定 / 危险按钮 - 统一白灰系
+        &.el-button--primary,
+        &.el-button--danger {
+          background: #ffffff !important;
+          border: 1px solid #dcdfe6 !important;
+          color: #606266 !important;
           
           &:hover {
-            background: #fafafa !important;
-            border-color: #667eea !important;
-            color: #667eea !important;
+            background: #f5f7fa !important;
+            border-color: #c0c4cc !important;
+            color: #606266 !important;
+            box-shadow: none !important;
           }
           
           &:active {
             background: #f0f0f0 !important;
-          }
-        }
-        
-        // 确定按钮
-        &.el-button--primary {
-          background: #667eea !important;
-          border: none !important;
-          color: #ffffff !important;
-          
-          &:hover {
-            background: #7c92f0 !important;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
-          }
-          
-          &:active {
-            background: #5568d3 !important;
-          }
-        }
-        
-        // 删除/危险按钮
-        &.el-button--danger {
-          background: #ff4d4f !important;
-          border: none !important;
-          color: #ffffff !important;
-          
-          &:hover {
-            background: #ff7875 !important;
-            box-shadow: 0 4px 12px rgba(255, 77, 79, 0.35);
-          }
-          
-          &:active {
-            background: #d9363e !important;
           }
         }
       }
